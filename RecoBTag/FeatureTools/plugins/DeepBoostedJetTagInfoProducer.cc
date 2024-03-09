@@ -26,6 +26,9 @@
 #include "DataFormats/BTauReco/interface/DeepBoostedJetTagInfo.h"
 #include "DataFormats/Common/interface/AssociationMap.h"
 
+#define DIAG_LVL  DIAG_IFO
+#include "RecoBTag/FeatureTools/interface/diagnostic.h"
+
 using namespace btagbtvdeep;
 
 class DeepBoostedJetTagInfoProducer : public edm::stream::EDProducer<> {
@@ -239,6 +242,15 @@ DeepBoostedJetTagInfoProducer::DeepBoostedJetTagInfoProducer(const edm::Paramete
       covarianceVersion_(iConfig.getParameter<int>("covarianceVersion")),
       covariancePackingSchemas_(iConfig.getParameter<std::vector<int>>("covariancePackingSchemas")),
       use_scouting_features_(iConfig.getParameter<bool>("use_scouting_features")) {
+  {
+    static int unused __attribute__((unused)) = ({  // One thread executes this, and other threads must wait it to end.
+      difo << "use_puppiP4: " << use_puppiP4_ << dend;
+      difo << "use_hlt_features: " << use_hlt_features_ << dend;
+      difo << "use_scouting_features: " << use_scouting_features_ << dend;
+      0;
+    });
+  }
+
   const auto &puppi_value_map_tag = iConfig.getParameter<edm::InputTag>("puppi_value_map");
   if (!puppi_value_map_tag.label().empty()) {
     puppi_value_map_token_ = consumes<edm::ValueMap<float>>(puppi_value_map_tag);
@@ -812,6 +824,7 @@ void DeepBoostedJetTagInfoProducer::fillParticleFeatures(DeepBoostedJetFeatures 
         math::XYZPoint pv_ass_pos;
         // In case input is a packed candidate (evaluate HLT network on offline)
         if (packed_cand) {
+          dwrn << "unexpected packed candidate" << dend;
           candidate = *packed_cand;
           pv_ass = reco::VertexRef(vtxs_, 0);
           pv_ass_pos = pv_ass->position();
@@ -900,8 +913,8 @@ void DeepBoostedJetTagInfoProducer::fillParticleFeatures(DeepBoostedJetFeatures 
 
         TVector3 cand_direction(candP3.x(), candP3.y(), candP3.z());
 
-        fts.fill("jet_pfcand_pt_log", std::log(candP4.pt()));
-        fts.fill("jet_pfcand_energy_log", std::log(candP4.energy()));
+        fts.fill("jet_pfcand_pt_log", std::log(candP4.pt()));  // concerned output
+        fts.fill("jet_pfcand_energy_log", std::log(candP4.energy()));  // concerned output
         fts.fill("jet_pfcand_eta", candP4.eta());
         fts.fill("jet_pfcand_deta", jet_direction.Eta() - cand_direction.Eta());
         fts.fill("jet_pfcand_dphi", jet_direction.DeltaPhi(cand_direction));
