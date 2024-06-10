@@ -19,5 +19,8 @@ __init__.py
 *.xcodeproj
 .vscode
 
-#ignore mac specific file
+# ignore mac specific file
 .DS_Store
+
+# permit .ycm_extra_conf.py
+!.ycm_extra_conf.py
