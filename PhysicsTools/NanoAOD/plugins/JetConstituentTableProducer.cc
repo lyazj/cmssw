@@ -102,6 +102,8 @@ JetConstituentTableProducer<T>::JetConstituentTableProducer(const edm::Parameter
   produces<nanoaod::FlatTable>(name_);
   produces<nanoaod::FlatTable>(nameSV_);
   produces<std::vector<reco::CandidatePtr>>();
+  std::clog << "sv_sort: " << sv_sort_ << std::endl;
+  std::clog << "pf_sort: " << pf_sort_ << std::endl;
 }
 
 template <typename T>

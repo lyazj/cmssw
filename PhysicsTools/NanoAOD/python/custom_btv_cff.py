@@ -618,6 +618,12 @@ def addPFCands(process, allPF = False, addAK4=False, addAK8=False):
                                                             trkPhi = Var("?hasTrackDetails()?pseudoTrack().phi():-1", float, doc="track phi", precision=12),
                                                          )
                                     )
+    kwargs = { }
+    import os
+    sv_sort = os.getenv('CMSSW_NANOAOD_SV_SORT')
+    if sv_sort is not None: kwargs['sv_sort'] = cms.untracked.string(sv_sort)
+    pf_sort = os.getenv('CMSSW_NANOAOD_PF_SORT')
+    if pf_sort is not None: kwargs['pf_sort'] = cms.untracked.string(pf_sort)
     process.customAK8ConstituentsTable = cms.EDProducer("PatJetConstituentTableProducer",
                                                         candidates = candInput,
                                                         jets = cms.InputTag("finalJetsAK8"),
@@ -626,6 +632,7 @@ def addPFCands(process, allPF = False, addAK4=False, addAK8=False):
                                                         idx_name = cms.string("pFCandsIdx"),
                                                         nameSV = cms.string("FatJetSVs"),
                                                         idx_nameSV = cms.string("sVIdx"),
+                                                        **kwargs,
                                                         )
     process.customAK4ConstituentsTable = cms.EDProducer("PatJetConstituentTableProducer",
                                                         candidates = candInput,
@@ -635,6 +642,7 @@ def addPFCands(process, allPF = False, addAK4=False, addAK8=False):
                                                         idx_name = cms.string("pFCandsIdx"),
                                                         nameSV = cms.string("JetSVs"),
                                                         idx_nameSV = cms.string("sVIdx"),
+                                                        **kwargs,
                                                         )
     process.customizedPFCandsTask.add(process.customConstituentsExtTable)
 
