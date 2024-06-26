@@ -510,14 +510,14 @@ def add_BTV(process,  addAK4=False, addAK8=False, scheme="btvSF"):
     
     
          # from Run3 onwards, always set storeAK4Truth to True for MC
-        process.customAK4ConstituentsForDeepJetTable = cms.EDProducer("PatJetDeepJetTableProducer",
+        process.customAK4ConstituentsForJetTaggerTable = cms.EDProducer("PatJetTaggerTableProducer",
                                                                         jets = cms.InputTag("linkedObjects","jets"),
                                                                         n_cpf=cms.uint32(_n_cpf),
                                                                         n_npf=cms.uint32(_n_npf),
                                                                         n_sv=cms.uint32(_n_sv)
                                                                       )
         process.customizeJetTask.add(process.customJetExtTable)
-        process.customizeJetTask.add(process.customAK4ConstituentsForDeepJetTable)
+        process.customizeJetTask.add(process.customAK4ConstituentsForJetTaggerTable)
     # AK8
     if addAK8:
         process = update_jets_AK8(process)

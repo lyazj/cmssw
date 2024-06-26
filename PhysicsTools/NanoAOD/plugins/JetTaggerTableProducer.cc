@@ -26,10 +26,10 @@ using namespace btagbtvdeep;
 #include "DataFormats/PatCandidates/interface/Jet.h"
 
 template <typename T>
-class DeepJetTableProducer : public edm::stream::EDProducer<> {
+class JetTaggerTableProducer : public edm::stream::EDProducer<> {
 public:
-  explicit DeepJetTableProducer(const edm::ParameterSet&);
-  ~DeepJetTableProducer() override;
+  explicit JetTaggerTableProducer(const edm::ParameterSet&);
+  ~JetTaggerTableProducer() override;
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
@@ -54,7 +54,7 @@ private:
 // constructors and destructor
 //
 template <typename T>
-DeepJetTableProducer<T>::DeepJetTableProducer(const edm::ParameterSet& iConfig)
+JetTaggerTableProducer<T>::JetTaggerTableProducer(const edm::ParameterSet& iConfig)
     : nameDeepJet_(iConfig.getParameter<std::string>("nameDeepJet")),
       idx_nameDeepJet_(iConfig.getParameter<std::string>("idx_nameDeepJet")),
       n_cpf_(iConfig.getParameter<unsigned int>("n_cpf")),
@@ -66,10 +66,10 @@ DeepJetTableProducer<T>::DeepJetTableProducer(const edm::ParameterSet& iConfig)
 }
 
 template <typename T>
-DeepJetTableProducer<T>::~DeepJetTableProducer() {}
+JetTaggerTableProducer<T>::~JetTaggerTableProducer() {}
 
 template <typename T>
-void DeepJetTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
   // elements in all these collections must have the same order!
 
   // only necessary to explicitly check correct matching of jets
@@ -392,7 +392,7 @@ void DeepJetTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetup&
 }
 
 template <typename T>
-void DeepJetTableProducer<T>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void JetTaggerTableProducer<T>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
   desc.add<std::string>("nameDeepJet", "Jet");
   desc.add<std::string>("idx_nameDeepJet", "djIdx");
@@ -405,6 +405,6 @@ void DeepJetTableProducer<T>::fillDescriptions(edm::ConfigurationDescriptions& d
   descriptions.addWithDefaultLabel(desc);
 }
 
-typedef DeepJetTableProducer<pat::Jet> PatJetDeepJetTableProducer;
+typedef JetTaggerTableProducer<pat::Jet> PatJetTaggerTableProducer;
 
-DEFINE_FWK_MODULE(PatJetDeepJetTableProducer);
+DEFINE_FWK_MODULE(PatJetTaggerTableProducer);
