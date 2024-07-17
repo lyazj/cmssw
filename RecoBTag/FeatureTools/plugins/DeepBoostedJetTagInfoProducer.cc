@@ -474,8 +474,9 @@ void DeepBoostedJetTagInfoProducer::produce(edm::Event &iEvent, const edm::Event
     difo << "jet_pt=" << jet.pt()
          << "\tjet_eta=" << jet.eta()
          << "\tjet_phi=" << jet.phi()
-         << "\tjet_energy=" << jet.energy()
-         << "\tjet_mass=" << jet.mass()
+         << "\tjet_px=" << jet.px()
+         << "\tjet_py=" << jet.py()
+         << "\tjet_pz=" << jet.pz()
          << dend;
   }
   // move output collection
