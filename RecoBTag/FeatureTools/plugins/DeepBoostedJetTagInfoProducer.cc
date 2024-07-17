@@ -470,6 +470,13 @@ void DeepBoostedJetTagInfoProducer::produce(edm::Event &iEvent, const edm::Event
     }
     // this should always be done even if features are not filled
     output_tag_infos->emplace_back(features, jet_ref);
+
+    difo << "jet_pt=" << jet.pt()
+         << "\tjet_eta=" << jet.eta()
+         << "\tjet_phi=" << jet.phi()
+         << "\tjet_energy=" << jet.energy()
+         << "\tjet_mass=" << jet.mass()
+         << dend;
   }
   // move output collection
   iEvent.put(std::move(output_tag_infos));
