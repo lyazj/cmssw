@@ -244,7 +244,8 @@ DeepBoostedJetTagInfoProducer::DeepBoostedJetTagInfoProducer(const edm::Paramete
       use_scouting_features_(iConfig.getParameter<bool>("use_scouting_features")) {
   {
     static int unused __attribute__((unused)) = ({  // One thread executes this, and other threads must wait it to end.
-      difo << "use_puppiP4: " << use_puppiP4_ << dend;
+      difo << std::scientific << std::setprecision(3)
+           << "use_puppiP4: " << use_puppiP4_ << dend;
       difo << "use_hlt_features: " << use_hlt_features_ << dend;
       difo << "use_scouting_features: " << use_scouting_features_ << dend;
       0;
@@ -474,9 +475,6 @@ void DeepBoostedJetTagInfoProducer::produce(edm::Event &iEvent, const edm::Event
     difo << "jet_pt=" << jet.pt()
          << "\tjet_eta=" << jet.eta()
          << "\tjet_phi=" << jet.phi()
-         << "\tjet_px=" << jet.px()
-         << "\tjet_py=" << jet.py()
-         << "\tjet_pz=" << jet.pz()
          << dend;
   }
   // move output collection
@@ -939,6 +937,15 @@ void DeepBoostedJetTagInfoProducer::fillParticleFeatures(DeepBoostedJetFeatures 
         fts.fill("jet_pfcand_npixhits", candidate.numberOfPixelHits());
         fts.fill("jet_pfcand_nstriphits", candidate.stripLayersWithMeasurement());
         fts.fill("pfcand_mask", 1);
+
+        difo << "jet_pfcand_pt=" << candP4.pt()
+             << "\tjet_pfcand_eta=" << candP4.eta()
+             << "\tjet_pfcand_phi=" << candP4.phi()
+             << "\tjet_pfcand_dxy=" << candidate.dxy(pv_ass_pos)
+             << "\tjet_pfcand_dz=" << candidate.dz(pv_ass_pos)
+             << "\tjet_pfcand_npixhits=" << candidate.numberOfPixelHits()
+             << "\tjet_pfcand_nstriphits=" << candidate.stripLayersWithMeasurement()
+             << dend;
 
         if (track) {
           fts.fill("jet_pfcand_dzsig", fabs(candidate.dz(pv_ass_pos)) / candidate.dzError());
