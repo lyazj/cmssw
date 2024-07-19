@@ -123,9 +123,9 @@ public:
 
 }  // namespace
 
-#define ddbg  (UniqueDiagnosticLogger(DIAG_DBG, ECMA48_SGR::FG_BCYN, std::clog, __FILE_NAME__, __LINE__, __PRETTY_FUNCTION__))
-#define difo  (UniqueDiagnosticLogger(DIAG_IFO, ECMA48_SGR::FG_BGRN, std::clog, __FILE_NAME__, __LINE__, __PRETTY_FUNCTION__))
-#define dwrn  (UniqueDiagnosticLogger(DIAG_WRN, ECMA48_SGR::FG_BBRN, std::cerr, __FILE_NAME__, __LINE__, __PRETTY_FUNCTION__))
-#define derr  (UniqueDiagnosticLogger(DIAG_ERR, ECMA48_SGR::FG_BRED, std::cerr, __FILE_NAME__, __LINE__, __PRETTY_FUNCTION__))
-#define dftl  (UniqueDiagnosticLogger(DIAG_FTL, ECMA48_SGR::FG_BMGT, std::cerr, __FILE_NAME__, __LINE__, __PRETTY_FUNCTION__))
+#define ddbg  (UniqueDiagnosticLogger(DIAG_DBG, ECMA48_SGR::FG_BCYN, std::clog, __FILE_NAME__, __LINE__, __FUNCTION__))
+#define difo  (UniqueDiagnosticLogger(DIAG_IFO, ECMA48_SGR::FG_BGRN, std::clog, __FILE_NAME__, __LINE__, __FUNCTION__))
+#define dwrn  (UniqueDiagnosticLogger(DIAG_WRN, ECMA48_SGR::FG_BBRN, std::cerr, __FILE_NAME__, __LINE__, __FUNCTION__))
+#define derr  (UniqueDiagnosticLogger(DIAG_ERR, ECMA48_SGR::FG_BRED, std::cerr, __FILE_NAME__, __LINE__, __FUNCTION__))
+#define dftl  (UniqueDiagnosticLogger(DIAG_FTL, ECMA48_SGR::FG_BMGT, std::cerr, __FILE_NAME__, __LINE__, __FUNCTION__))
 #define dend  (LoggingTerminator())  // Additional () also guarantees disambiguating as an expression.
