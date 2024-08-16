@@ -248,6 +248,8 @@ DeepBoostedJetTagInfoProducer::DeepBoostedJetTagInfoProducer(const edm::Paramete
            << "use_puppiP4: " << use_puppiP4_ << dend;
       difo << "use_hlt_features: " << use_hlt_features_ << dend;
       difo << "use_scouting_features: " << use_scouting_features_ << dend;
+      difo << "min_pt_for_pfcandidates: " << min_pt_for_pfcandidates_ << dend;
+      difo << "min_pt_for_track_properties: " << min_pt_for_track_properties_ << dend;
       0;
     });
   }
