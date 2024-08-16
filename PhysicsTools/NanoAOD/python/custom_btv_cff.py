@@ -56,7 +56,7 @@ def update_jets_AK4(process):
     process.updatedJetsPuppi.jetSource = "selectedUpdatedPatJetsPuppiWithDeepInfo"
     
     
-    process.updatedPatJetsTransientCorrectedPuppiWithDeepInfo.tagInfoSources.append(cms.InputTag("pfDeepFlavourTagInfosPuppiWithDeepInfo"))
+    process.updatedPatJetsTransientCorrectedPuppiWithDeepInfo.tagInfoSources.append(cms.InputTag("pfUnifiedParticleTransformerAK4TagInfosPuppiWithDeepInfo"))
     process.updatedPatJetsTransientCorrectedPuppiWithDeepInfo.addTagInfos = cms.bool(True)
 
     

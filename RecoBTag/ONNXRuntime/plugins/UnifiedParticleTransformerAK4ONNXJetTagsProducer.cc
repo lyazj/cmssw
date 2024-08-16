@@ -16,6 +16,9 @@
 
 #include "PhysicsTools/ONNXRuntime/interface/ONNXRuntime.h"
 
+#define DIAG_LVL  DIAG_IFO
+#include "RecoBTag/FeatureTools/interface/diagnostic.h"
+
 using namespace cms::Ort;
 
 class UnifiedParticleTransformerAK4ONNXJetTagsProducer : public edm::stream::EDProducer<edm::GlobalCache<ONNXRuntime>> {
@@ -232,6 +235,8 @@ void UnifiedParticleTransformerAK4ONNXJetTagsProducer::make_inputs(
 
   // n_lt candidates
   auto max_lt_n = std::min(features.lt_features.size(), (std::size_t)n_lt_);
+  difo << "#loss_track: " << max_lt_n << dend;
+
   for (std::size_t lt_n = 0; lt_n < max_lt_n; lt_n++) {
     const auto& lt_features = features.lt_features.at(lt_n);
     ptr = &data_[kLostTracks][offset + lt_n * n_features_lt_];

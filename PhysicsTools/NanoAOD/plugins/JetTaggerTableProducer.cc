@@ -401,7 +401,7 @@ void JetTaggerTableProducer<T>::fillDescriptions(edm::ConfigurationDescriptions&
   desc.add<unsigned int>("n_npf", 3);
   desc.add<unsigned int>("n_sv", 4);
   desc.add<edm::InputTag>("jets", edm::InputTag("slimmedJetsPuppi"));
-  desc.add<edm::InputTag>("tagInfo_src", edm::InputTag("pfDeepFlavourTagInfosPuppiWithDeepInfo"));
+  desc.add<edm::InputTag>("tagInfo_src", edm::InputTag("pfUnifiedParticleTransformerAK4TagInfosPuppiWithDeepInfo"));
   descriptions.addWithDefaultLabel(desc);
 }
 
