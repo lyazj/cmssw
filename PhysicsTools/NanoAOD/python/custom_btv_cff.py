@@ -50,12 +50,14 @@ def update_jets_AK4(process):
                              'L2L3Residual']), 'None'),
         btagDiscriminators=_btagDiscriminators,
         postfix='PuppiWithDeepInfo',
+        btagInfos=["pfUnifiedParticleTransformerAK4TagInfos"],
     )
     process.load("Configuration.StandardSequences.MagneticField_cff")
     process.jetPuppiCorrFactorsNano.src = "selectedUpdatedPatJetsPuppiWithDeepInfo"
     process.updatedJetsPuppi.jetSource = "selectedUpdatedPatJetsPuppiWithDeepInfo"
     
     
+    process.updatedPatJetsTransientCorrectedPuppiWithDeepInfo.tagInfoSources.append(cms.InputTag("pfDeepFlavourTagInfosPuppiWithDeepInfo"))
     process.updatedPatJetsTransientCorrectedPuppiWithDeepInfo.tagInfoSources.append(cms.InputTag("pfUnifiedParticleTransformerAK4TagInfosPuppiWithDeepInfo"))
     process.updatedPatJetsTransientCorrectedPuppiWithDeepInfo.addTagInfos = cms.bool(True)
 
@@ -469,9 +471,9 @@ def add_BTV(process,  addAK4=False, addAK8=False, scheme="btvSF"):
     # AK4
     if addAK4:
         if scheme == "btvSF":
-            _n_cpf = 3 
-            _n_npf = 3
-            _n_sv = 4
+            _n_cpf = 2
+            _n_npf = 1
+            _n_sv = 2
         elif scheme == "DeepJet":
             _n_cpf = 25 
             _n_npf = 25
@@ -664,8 +666,8 @@ def addPFCands(process, allPF = False, addAK4=False, addAK8=False):
 btvNano_switch = cms.PSet(
     btvNano_addAK4_switch = cms.untracked.bool(True),
     btvNano_addAK8_switch = cms.untracked.bool(False),
-    btvNano_addallPF_switch = cms.untracked.bool(False),
-    TaggerInput = cms.string("btvSF")
+    btvNano_addallPF_switch = cms.untracked.bool(True),
+    TaggerInput = cms.string("RobustParTAK4")
   )
 
 def BTVCustomNanoAOD(process):

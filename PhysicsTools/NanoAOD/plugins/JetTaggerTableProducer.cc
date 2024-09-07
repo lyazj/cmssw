@@ -20,7 +20,7 @@ using namespace btagbtvdeep;
 // add tag info and a way to go back to the jet reference
 #include "FWCore/Framework/interface/makeRefToBaseProdFrom.h"
 #include "DataFormats/BTauReco/interface/JetTag.h"
-#include "DataFormats/BTauReco/interface/DeepFlavourTagInfo.h"
+#include "DataFormats/BTauReco/interface/UnifiedParticleTransformerAK4TagInfo.h"
 
 // To store the gen info to get the truth flavour of the jet
 #include "DataFormats/PatCandidates/interface/Jet.h"
@@ -38,13 +38,14 @@ private:
 
   const std::string nameDeepJet_;
   const std::string idx_nameDeepJet_;
-  const unsigned int n_cpf_ = 25;
+  const unsigned int n_cpf_ = 29;
   const unsigned int n_npf_ = 25;
   const unsigned int n_sv_ = 12;
+  const unsigned int n_lt_ = 5;
 
   edm::EDGetTokenT<edm::View<T>> jet_token_;
 
-  typedef std::vector<reco::DeepFlavourTagInfo> TagInfoCollection;
+  typedef std::vector<reco::UnifiedParticleTransformerAK4TagInfo> TagInfoCollection;
   const edm::EDGetTokenT<TagInfoCollection> tag_info_src_;
 
   constexpr static bool usePhysForLightAndUndefined = false;
@@ -60,6 +61,7 @@ JetTaggerTableProducer<T>::JetTaggerTableProducer(const edm::ParameterSet& iConf
       n_cpf_(iConfig.getParameter<unsigned int>("n_cpf")),
       n_npf_(iConfig.getParameter<unsigned int>("n_npf")),
       n_sv_(iConfig.getParameter<unsigned int>("n_sv")),
+      n_lt_(iConfig.getParameter<unsigned int>("n_lt")),
       jet_token_(consumes<edm::View<T>>(iConfig.getParameter<edm::InputTag>("jets"))),
       tag_info_src_(consumes<TagInfoCollection>(iConfig.getParameter<edm::InputTag>("tagInfo_src"))) {
   produces<nanoaod::FlatTable>(nameDeepJet_);
@@ -84,8 +86,9 @@ void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetu
 
   std::vector<int> jet_N_CPFCands(nJets);
   std::vector<int> jet_N_NPFCands(nJets);
-  std::vector<int> jet_N_PVs(nJets);
+  //std::vector<int> jet_N_PVs(nJets);
   std::vector<int> jet_N_SVs(nJets);
+  std::vector<int> jet_N_LTs(nJets);
 
   // should default to 0 if less than nCpf cpf with information
   std::vector<std::vector<float>> Cpfcan_BtagPf_trackEtaRel_nCpf(n_cpf_, std::vector<float>(nJets));
@@ -136,6 +139,7 @@ void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetu
   */
   std::vector<std::vector<float>> sv_deltaR_nSV(n_sv_, std::vector<float>(nJets));
   std::vector<std::vector<float>> sv_enratio_nSV(n_sv_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> lt_pt_nLT(n_lt_, std::vector<float>(nJets));
 
   if (!tag_infos->empty()) {
     for (unsigned i_jet = 0; i_jet < nJets; ++i_jet) {
@@ -149,7 +153,8 @@ void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetu
       jet_N_CPFCands[i_jet] = features.c_pf_features.size();
       jet_N_NPFCands[i_jet] = features.n_pf_features.size();
       jet_N_SVs[i_jet] = features.sv_features.size();
-      jet_N_PVs[i_jet] = features.npv;
+      //jet_N_PVs[i_jet] = features.npv;
+      jet_N_LTs[i_jet] = features.lt_features.size();
 
       // c_pf candidates
       auto max_c_pf_n = std::min(features.c_pf_features.size(), (std::size_t)n_cpf_);
@@ -206,11 +211,11 @@ void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetu
         sv_d3dsig_nSV[sv_n][i_jet] = sv_features.d3dsig;
         sv_costhetasvpv_nSV[sv_n][i_jet] = sv_features.costhetasvpv;
         sv_enratio_nSV[sv_n][i_jet] = sv_features.enratio;
-        /*
-            // only after dataformat updated as well
-            sv_etarel_nSV[sv_n][i_jet] = sv_features.etarel;
-            sv_phirel_nSV[sv_n][i_jet] = sv_features.phirel;
-            */
+        auto max_lt_n = std::min(features.lt_features.size(), (std::size_t)n_lt_);
+        for (std::size_t lt_n = 0; lt_n < max_lt_n; lt_n++) {
+          const auto& lt_features = features.lt_features.at(lt_n);
+          lt_pt_nLT[lt_n][i_jet] = lt_features.pt;
+        }
       }
     }
   }
@@ -222,7 +227,8 @@ void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetu
   djTable->addColumn<int>("DeepJet_nCpfcand", jet_N_CPFCands, "Number of charged PF candidates in the jet");
   djTable->addColumn<int>("DeepJet_nNpfcand", jet_N_NPFCands, "Number of neutral PF candidates in the jet");
   djTable->addColumn<int>("DeepJet_nsv", jet_N_SVs, "Number of secondary vertices in the jet");
-  djTable->addColumn<int>("DeepJet_npv", jet_N_PVs, "Number of primary vertices");
+  //djTable->addColumn<int>("DeepJet_npv", jet_N_PVs, "Number of primary vertices");
+  djTable->addColumn<int>("DeepJet_nlt", jet_N_LTs, "Number of lost tracks in the jet");
 
   // ============================================================== Cpfs ===================================================================
   for (unsigned int p = 0; p < n_cpf_; p++) {
@@ -387,6 +393,10 @@ void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetu
     djTable->addColumn<float>(
         "DeepJet_sv_enratio_" + s, sv_enratio_nSV[p], "ratio of the " + s + ". SV energy ratio to the jet energy", 10);
   }
+  for (unsigned int p = 0; p < n_lt_; p++) {
+    auto s = std::to_string(p);
+    djTable->addColumn<float>("DeepJet_lt_pt_" + s, lt_pt_nLT[p], "Lost track o " + s + ". SV", 10);
+  }
 
   iEvent.put(std::move(djTable), nameDeepJet_);
 }
@@ -397,9 +407,10 @@ void JetTaggerTableProducer<T>::fillDescriptions(edm::ConfigurationDescriptions&
   desc.add<std::string>("nameDeepJet", "Jet");
   desc.add<std::string>("idx_nameDeepJet", "djIdx");
 
-  desc.add<unsigned int>("n_cpf", 3);
-  desc.add<unsigned int>("n_npf", 3);
-  desc.add<unsigned int>("n_sv", 4);
+  desc.add<unsigned int>("n_cpf", 2);
+  desc.add<unsigned int>("n_npf", 2);
+  desc.add<unsigned int>("n_sv", 2);
+  desc.add<unsigned int>("n_lt", 2);
   desc.add<edm::InputTag>("jets", edm::InputTag("slimmedJetsPuppi"));
   desc.add<edm::InputTag>("tagInfo_src", edm::InputTag("pfUnifiedParticleTransformerAK4TagInfosPuppiWithDeepInfo"));
   descriptions.addWithDefaultLabel(desc);
