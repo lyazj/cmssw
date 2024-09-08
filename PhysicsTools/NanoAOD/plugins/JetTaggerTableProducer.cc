@@ -211,11 +211,12 @@ void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetu
         sv_d3dsig_nSV[sv_n][i_jet] = sv_features.d3dsig;
         sv_costhetasvpv_nSV[sv_n][i_jet] = sv_features.costhetasvpv;
         sv_enratio_nSV[sv_n][i_jet] = sv_features.enratio;
-        auto max_lt_n = std::min(features.lt_features.size(), (std::size_t)n_lt_);
-        for (std::size_t lt_n = 0; lt_n < max_lt_n; lt_n++) {
-          const auto& lt_features = features.lt_features.at(lt_n);
-          lt_pt_nLT[lt_n][i_jet] = lt_features.pt;
-        }
+      }
+
+      auto max_lt_n = std::min(features.lt_features.size(), (std::size_t)n_lt_);
+      for (std::size_t lt_n = 0; lt_n < max_lt_n; lt_n++) {
+        const auto& lt_features = features.lt_features.at(lt_n);
+        lt_pt_nLT[lt_n][i_jet] = lt_features.pt;
       }
     }
   }
@@ -393,9 +394,11 @@ void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetu
     djTable->addColumn<float>(
         "DeepJet_sv_enratio_" + s, sv_enratio_nSV[p], "ratio of the " + s + ". SV energy ratio to the jet energy", 10);
   }
+
+  // ============================================================== LTs ===================================================================
   for (unsigned int p = 0; p < n_lt_; p++) {
     auto s = std::to_string(p);
-    djTable->addColumn<float>("DeepJet_lt_pt_" + s, lt_pt_nLT[p], "Lost track o " + s + ". SV", 10);
+    djTable->addColumn<float>("DeepJet_lt_pt_" + s, lt_pt_nLT[p], "Lost track pt of the " + s + ". LT", 10);
   }
 
   iEvent.put(std::move(djTable), nameDeepJet_);
