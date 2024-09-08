@@ -156,10 +156,92 @@ void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetu
       //jet_N_PVs[i_jet] = features.npv;
       jet_N_LTs[i_jet] = features.lt_features.size();
 
-      // c_pf candidates
+      std::vector<const btagbtvdeep::ChargedCandidateFeatures *> ranked_c_pf_features;
+      ranked_c_pf_features.reserve(features.c_pf_features.size());
+      for (auto &c_pf : features.c_pf_features) ranked_c_pf_features.push_back(&c_pf);
+
+      std::vector<const btagbtvdeep::NeutralCandidateFeatures *> ranked_n_pf_features;
+      ranked_n_pf_features.reserve(features.n_pf_features.size());
+      for (auto &n_pf : features.n_pf_features) ranked_n_pf_features.push_back(&n_pf);
+
+      std::vector<const btagbtvdeep::SecondaryVertexFeatures *> ranked_sv_features;
+      ranked_sv_features.reserve(features.sv_features.size());
+      for (auto &sv : features.sv_features) ranked_sv_features.push_back(&sv);
+
+      std::vector<const btagbtvdeep::LostTracksFeatures *> ranked_lt_features;
+      ranked_lt_features.reserve(features.lt_features.size());
+      for (auto &lt : features.lt_features) ranked_lt_features.push_back(&lt);
+
       auto max_c_pf_n = std::min(features.c_pf_features.size(), (std::size_t)n_cpf_);
+      auto max_n_pf_n = std::min(features.n_pf_features.size(), (std::size_t)n_npf_);
+      auto max_sv_n = std::min(features.sv_features.size(), (std::size_t)n_sv_);
+      auto max_lt_n = std::min(features.lt_features.size(), (std::size_t)n_lt_);
+
+      auto c_pf_cmp = [](const btagbtvdeep::ChargedCandidateFeatures *a, const btagbtvdeep::ChargedCandidateFeatures *b)
+      { return a->pt > b->pt; };
+      //auto n_pf_cmp = [](const btagbtvdeep::NeutralCandidateFeatures *a, const btagbtvdeep::NeutralCandidateFeatures *b)
+      //{ return a->pt > b->pt; };
+      auto sv_cmp = [](const btagbtvdeep::SecondaryVertexFeatures *a, const btagbtvdeep::SecondaryVertexFeatures *b)
+      { return a->pt > b->pt; };
+      //auto lt_cmp = [](const btagbtvdeep::LostTracksFeatures *a, const btagbtvdeep::LostTracksFeatures *b)
+      //{ return a->pt > b->pt; };
+
+      auto c_pf_cmp_ip = [](const btagbtvdeep::ChargedCandidateFeatures *a, const btagbtvdeep::ChargedCandidateFeatures *b)
+      { return fabs(a->btagPf_trackSip2dVal) > fabs(b->btagPf_trackSip2dVal); };
+      auto sv_cmp_ip = [](const btagbtvdeep::SecondaryVertexFeatures *a, const btagbtvdeep::SecondaryVertexFeatures *b)
+      { return fabs(a->dxy) > fabs(b->dxy); };
+
+      // c_pf
+      if(n_cpf_ == 2) {
+        // 0: highest pT
+        // 1: highest IP
+        if(!ranked_c_pf_features.empty()) {
+          auto highest_pT = *std::min_element(ranked_c_pf_features.begin(), ranked_c_pf_features.end(), c_pf_cmp);
+          auto highest_IP = *std::min_element(ranked_c_pf_features.begin(), ranked_c_pf_features.end(), c_pf_cmp_ip);
+          ranked_c_pf_features = { highest_pT, highest_IP };
+        }
+      } else {
+        // highest pT
+        //std::nth_element(ranked_c_pf_features.begin(),
+        //    ranked_c_pf_features.begin() + max_c_pf_n, ranked_c_pf_features.end(), c_pf_cmp);
+        //std::sort(ranked_c_pf_features.begin(), ranked_c_pf_features.end(), c_pf_cmp);
+      }
+
+      // n_pf
+      {
+        // highest pT
+        //std::nth_element(ranked_n_pf_features.begin(),
+        //    ranked_n_pf_features.begin() + max_n_pf_n, ranked_n_pf_features.end(), n_pf_cmp);
+        //std::sort(ranked_n_pf_features.begin(), ranked_n_pf_features.end(), n_pf_cmp);
+      }
+
+      // sv
+      if(n_sv_ == 2) {
+        // 0: highest pT
+        // 1: highest IP
+        if(!ranked_sv_features.empty()) {
+          auto highest_pT = *std::min_element(ranked_sv_features.begin(), ranked_sv_features.end(), sv_cmp);
+          auto highest_IP = *std::min_element(ranked_sv_features.begin(), ranked_sv_features.end(), sv_cmp_ip);
+          ranked_sv_features = { highest_pT, highest_IP };
+        }
+      } else {
+        // highest pT
+        //std::nth_element(ranked_sv_features.begin(),
+        //    ranked_sv_features.begin() + max_sv_n, ranked_sv_features.end(), sv_cmp);
+        //std::sort(ranked_sv_features.begin(), ranked_sv_features.end(), sv_cmp);
+      }
+
+      // lt
+      {
+        // highest pT
+        //std::nth_element(ranked_lt_features.begin(),
+        //    ranked_lt_features.begin() + max_lt_n, ranked_lt_features.end(), lt_cmp);
+        //std::sort(ranked_lt_features.begin(), ranked_lt_features.end(), lt_cmp);
+      }
+
+      // c_pf candidates
       for (std::size_t c_pf_n = 0; c_pf_n < max_c_pf_n; c_pf_n++) {
-        const auto& c_pf_features = features.c_pf_features.at(c_pf_n);
+        const auto& c_pf_features = *ranked_c_pf_features.at(c_pf_n);
         Cpfcan_BtagPf_trackEtaRel_nCpf[c_pf_n][i_jet] = c_pf_features.btagPf_trackEtaRel;
         Cpfcan_BtagPf_trackPtRel_nCpf[c_pf_n][i_jet] = c_pf_features.btagPf_trackPtRel;
         Cpfcan_BtagPf_trackPPar_nCpf[c_pf_n][i_jet] = c_pf_features.btagPf_trackPPar;
@@ -179,9 +261,8 @@ void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetu
       }
 
       // n_pf candidates
-      auto max_n_pf_n = std::min(features.n_pf_features.size(), (std::size_t)n_npf_);
       for (std::size_t n_pf_n = 0; n_pf_n < max_n_pf_n; n_pf_n++) {
-        const auto& n_pf_features = features.n_pf_features.at(n_pf_n);
+        const auto& n_pf_features = *ranked_n_pf_features.at(n_pf_n);
         Npfcan_ptrel_nNpf[n_pf_n][i_jet] = n_pf_features.ptrel;
         Npfcan_deltaR_nNpf[n_pf_n][i_jet] = n_pf_features.deltaR;
         Npfcan_isGamma_nNpf[n_pf_n][i_jet] = n_pf_features.isGamma;
@@ -196,9 +277,8 @@ void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetu
       }
 
       // sv candidates
-      auto max_sv_n = std::min(features.sv_features.size(), (std::size_t)n_sv_);
       for (std::size_t sv_n = 0; sv_n < max_sv_n; sv_n++) {
-        const auto& sv_features = features.sv_features.at(sv_n);
+        const auto& sv_features = *ranked_sv_features.at(sv_n);
         sv_pt_nSV[sv_n][i_jet] = sv_features.pt;
         sv_deltaR_nSV[sv_n][i_jet] = sv_features.deltaR;
         sv_mass_nSV[sv_n][i_jet] = sv_features.mass;
@@ -213,9 +293,9 @@ void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetu
         sv_enratio_nSV[sv_n][i_jet] = sv_features.enratio;
       }
 
-      auto max_lt_n = std::min(features.lt_features.size(), (std::size_t)n_lt_);
+      // lt candidates
       for (std::size_t lt_n = 0; lt_n < max_lt_n; lt_n++) {
-        const auto& lt_features = features.lt_features.at(lt_n);
+        const auto& lt_features = *ranked_lt_features.at(lt_n);
         lt_pt_nLT[lt_n][i_jet] = lt_features.pt;
       }
     }

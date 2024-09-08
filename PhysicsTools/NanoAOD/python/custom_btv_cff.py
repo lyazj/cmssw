@@ -472,7 +472,7 @@ def add_BTV(process,  addAK4=False, addAK8=False, scheme="btvSF"):
     if addAK4:
         if scheme == "btvSF":
             _n_cpf = 2
-            _n_npf = 1
+            _n_npf = 2
             _n_sv = 2
         elif scheme == "DeepJet":
             _n_cpf = 25 
