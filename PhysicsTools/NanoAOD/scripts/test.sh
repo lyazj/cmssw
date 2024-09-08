@@ -10,8 +10,8 @@ cmsDriver.py QCD_PT-120to170 \
     --number 1000 \
     --nThreads 10 \
     --filein /store/mc/Run3Summer23MiniAODv4/QCD_PT-120to170_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v14-v2/2530000/033b3fe0-d709-45e3-8569-c11ca9852845.root \
-    --fileout file:Nano_QCD_PT-120to170.root \
-    2>&1 | tee Nano_QCD_PT-120to170.log
+    --fileout file:QCD_PT-120to170.root \
+    2>&1 | tee QCD_PT-120to170.log
 
 cmsDriver.py TTto2L2Nu \
     --mc \
