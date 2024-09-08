@@ -187,9 +187,9 @@ void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetu
       //{ return a->pt > b->pt; };
 
       auto c_pf_cmp_ip = [](const btagbtvdeep::ChargedCandidateFeatures *a, const btagbtvdeep::ChargedCandidateFeatures *b)
-      { return fabs(a->btagPf_trackSip2dVal) > fabs(b->btagPf_trackSip2dVal); };
+      { return fabs(a->btagPf_trackSip3dVal) > fabs(b->btagPf_trackSip3dVal); };
       auto sv_cmp_ip = [](const btagbtvdeep::SecondaryVertexFeatures *a, const btagbtvdeep::SecondaryVertexFeatures *b)
-      { return fabs(a->dxy) > fabs(b->dxy); };
+      { return fabs(a->d3d) > fabs(b->d3d); };
 
       // c_pf
       if(n_cpf_ == 2) {
@@ -219,9 +219,16 @@ void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetu
       if(n_sv_ == 2) {
         // 0: highest pT
         // 1: highest IP
-        if(!ranked_sv_features.empty()) {
+        if(ranked_sv_features.size() >= 2) {
           auto highest_pT = *std::min_element(ranked_sv_features.begin(), ranked_sv_features.end(), sv_cmp);
           auto highest_IP = *std::min_element(ranked_sv_features.begin(), ranked_sv_features.end(), sv_cmp_ip);
+          if(highest_IP == highest_pT) {  // 1 overlaps with 0: try 2nd highest IP
+            std::nth_element(ranked_sv_features.begin(), next(ranked_sv_features.begin()), ranked_sv_features.end(), sv_cmp_ip);
+            for(size_t isv = 0; isv < 2; ++isv) {  // At most one of the both overlaps with 0.
+              highest_IP = ranked_sv_features[isv];
+              if(highest_IP != highest_pT) break;
+            }
+          }
           ranked_sv_features = { highest_pT, highest_IP };
         }
       } else {
