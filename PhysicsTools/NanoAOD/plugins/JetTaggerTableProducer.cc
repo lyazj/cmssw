@@ -144,7 +144,25 @@ void JetTaggerTableProducer<T>::produce(edm::Event &iEvent, const edm::EventSetu
   std::vector<std::vector<float>> sv_costhetasvpv_nSV(n_sv_, std::vector<float>(nJets));
   std::vector<std::vector<float>> sv_enratio_nSV(n_sv_, std::vector<float>(nJets));
 
-  std::vector<std::vector<float>> lt_pt_nLT(n_lt_, std::vector<float>(nJets));
+  // should default to 0 if less than nLT LTs with information
+  std::vector<std::vector<float>> lt_btagPf_trackEtaRel_nLT(n_lt_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> lt_btagPf_trackPtRel_nLT(n_lt_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> lt_btagPf_trackPPar_nLT(n_lt_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> lt_btagPf_trackDeltaR_nLT(n_lt_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> lt_btagPf_trackPParRatio_nLT(n_lt_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> lt_btagPf_trackSip2dVal_nLT(n_lt_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> lt_btagPf_trackSip2dSig_nLT(n_lt_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> lt_btagPf_trackSip3dVal_nLT(n_lt_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> lt_btagPf_trackSip3dSig_nLT(n_lt_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> lt_btagPf_trackJetDistVal_nLT(n_lt_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> lt_drminsv_nLT(n_lt_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> lt_charge_nLT(n_lt_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> lt_puppiw_nLT(n_lt_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> lt_chi2_nLT(n_lt_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> lt_quality_nLT(n_lt_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> lt_lostInnerHits_nLT(n_lt_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> lt_numberOfPixelHits_nLT(n_lt_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> lt_numberOfStripHits_nLT(n_lt_, std::vector<float>(nJets));
 
   if(!tag_infos->empty()) {
     for(unsigned i_jet = 0; i_jet < nJets; ++i_jet) {
@@ -312,7 +330,24 @@ void JetTaggerTableProducer<T>::produce(edm::Event &iEvent, const edm::EventSetu
       // lt candidates
       for(std::size_t lt_n = 0; lt_n < max_lt_n; lt_n++) {
         const auto &lt_features = *ranked_lt_features.at(lt_n);
-        lt_pt_nLT[lt_n][i_jet] = lt_features.pt;
+        lt_btagPf_trackEtaRel_nLT[lt_n][i_jet] = lt_features.btagPf_trackEtaRel;
+        lt_btagPf_trackPtRel_nLT[lt_n][i_jet] = lt_features.btagPf_trackPtRel;
+        lt_btagPf_trackPPar_nLT[lt_n][i_jet] = lt_features.btagPf_trackPPar;
+        lt_btagPf_trackDeltaR_nLT[lt_n][i_jet] = lt_features.btagPf_trackDeltaR;
+        lt_btagPf_trackPParRatio_nLT[lt_n][i_jet] = lt_features.btagPf_trackPParRatio;
+        lt_btagPf_trackSip2dVal_nLT[lt_n][i_jet] = lt_features.btagPf_trackSip2dVal;
+        lt_btagPf_trackSip2dSig_nLT[lt_n][i_jet] = lt_features.btagPf_trackSip2dSig;
+        lt_btagPf_trackSip3dVal_nLT[lt_n][i_jet] = lt_features.btagPf_trackSip3dVal;
+        lt_btagPf_trackSip3dSig_nLT[lt_n][i_jet] = lt_features.btagPf_trackSip3dSig;
+        lt_btagPf_trackJetDistVal_nLT[lt_n][i_jet] = lt_features.btagPf_trackJetDistVal;
+        lt_drminsv_nLT[lt_n][i_jet] = lt_features.drminsv;
+        lt_charge_nLT[lt_n][i_jet] = lt_features.charge;
+        lt_puppiw_nLT[lt_n][i_jet] = lt_features.puppiw;
+        lt_chi2_nLT[lt_n][i_jet] = lt_features.chi2;
+        lt_quality_nLT[lt_n][i_jet] = lt_features.quality;
+        lt_lostInnerHits_nLT[lt_n][i_jet] = lt_features.lostInnerHits;
+        lt_numberOfPixelHits_nLT[lt_n][i_jet] = lt_features.numberOfPixelHits;
+        lt_numberOfStripHits_nLT[lt_n][i_jet] = lt_features.numberOfStripHits;
       }
     }
   }
@@ -396,7 +431,25 @@ void JetTaggerTableProducer<T>::produce(edm::Event &iEvent, const edm::EventSetu
   // ============================================================== LTs ===================================================================
   for(unsigned int p = 0; p < n_lt_; p++) {
     auto s = std::to_string(p);
-    djTable->addColumn<float>("DeepJet_lt_pt_" + s, lt_pt_nLT[p], "Lost track pt of the " + s + ". LT", 10);
+
+    djTable->addColumn<float>("DeepJet_lt_btagPf_trackEtaRel_" + s, lt_btagPf_trackEtaRel_nLT[p], "", 10);
+    djTable->addColumn<float>("DeepJet_lt_btagPf_trackPtRel_" + s, lt_btagPf_trackPtRel_nLT[p], "", 10);
+    djTable->addColumn<float>("DeepJet_lt_btagPf_trackPPar_" + s, lt_btagPf_trackPPar_nLT[p], "", 10);
+    djTable->addColumn<float>("DeepJet_lt_btagPf_trackDeltaR_" + s, lt_btagPf_trackDeltaR_nLT[p], "", 10);
+    djTable->addColumn<float>("DeepJet_lt_btagPf_trackPParRatio_" + s, lt_btagPf_trackPParRatio_nLT[p], "", 10);
+    djTable->addColumn<float>("DeepJet_lt_btagPf_trackSip2dVal_" + s, lt_btagPf_trackSip2dVal_nLT[p], "", 10);
+    djTable->addColumn<float>("DeepJet_lt_btagPf_trackSip2dSig_" + s, lt_btagPf_trackSip2dSig_nLT[p], "", 10);
+    djTable->addColumn<float>("DeepJet_lt_btagPf_trackSip3dVal_" + s, lt_btagPf_trackSip3dVal_nLT[p], "", 10);
+    djTable->addColumn<float>("DeepJet_lt_btagPf_trackSip3dSig_" + s, lt_btagPf_trackSip3dSig_nLT[p], "", 10);
+    djTable->addColumn<float>("DeepJet_lt_btagPf_trackJetDistVal_" + s, lt_btagPf_trackJetDistVal_nLT[p], "", 10);
+    djTable->addColumn<float>("DeepJet_lt_drminsv_" + s, lt_drminsv_nLT[p], "", 10);
+    djTable->addColumn<float>("DeepJet_lt_charge_" + s, lt_charge_nLT[p], "", 10);
+    djTable->addColumn<float>("DeepJet_lt_puppiw_" + s, lt_puppiw_nLT[p], "", 10);
+    djTable->addColumn<float>("DeepJet_lt_chi2_" + s, lt_chi2_nLT[p], "", 10);
+    djTable->addColumn<float>("DeepJet_lt_quality_" + s, lt_quality_nLT[p], "", 10);
+    djTable->addColumn<float>("DeepJet_lt_lostInnerHits_" + s, lt_lostInnerHits_nLT[p], "", 10);
+    djTable->addColumn<float>("DeepJet_lt_numberOfPixelHits_" + s, lt_numberOfPixelHits_nLT[p], "", 10);
+    djTable->addColumn<float>("DeepJet_lt_numberOfStripHits_" + s, lt_numberOfStripHits_nLT[p], "", 10);
   }
 
   iEvent.put(std::move(djTable), nameDeepJet_);
