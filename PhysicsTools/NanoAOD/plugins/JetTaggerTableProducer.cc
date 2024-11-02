@@ -1,40 +1,37 @@
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/stream/EDProducer.h"
-
 #include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-
+#include "FWCore/Framework/interface/stream/EDProducer.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/StreamID.h"
-
 #include "RecoBTag/FeatureTools/interface/TrackInfoBuilder.h"
 
 using namespace btagbtvdeep;
 
-#include "DataFormats/Math/interface/deltaR.h"
-
-#include "CommonTools/Utils/interface/StringCutObjectSelector.h"
-#include "DataFormats/NanoAOD/interface/FlatTable.h"
 #include <string>
 
+#include "CommonTools/Utils/interface/StringCutObjectSelector.h"
+#include "DataFormats/Math/interface/deltaR.h"
+#include "DataFormats/NanoAOD/interface/FlatTable.h"
+
 // add tag info and a way to go back to the jet reference
-#include "FWCore/Framework/interface/makeRefToBaseProdFrom.h"
 #include "DataFormats/BTauReco/interface/JetTag.h"
 #include "DataFormats/BTauReco/interface/UnifiedParticleTransformerAK4TagInfo.h"
+#include "FWCore/Framework/interface/makeRefToBaseProdFrom.h"
 
 // To store the gen info to get the truth flavour of the jet
 #include "DataFormats/PatCandidates/interface/Jet.h"
 
-template <typename T>
+template<typename T>
 class JetTaggerTableProducer : public edm::stream::EDProducer<> {
 public:
-  explicit JetTaggerTableProducer(const edm::ParameterSet&);
+  explicit JetTaggerTableProducer(const edm::ParameterSet &);
   ~JetTaggerTableProducer() override;
 
-  static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+  static void fillDescriptions(edm::ConfigurationDescriptions &descriptions);
 
 private:
-  void produce(edm::Event&, const edm::EventSetup&) override;
+  void produce(edm::Event &, const edm::EventSetup &) override;
 
   const std::string nameDeepJet_;
   const std::string idx_nameDeepJet_;
@@ -54,8 +51,8 @@ private:
 //
 // constructors and destructor
 //
-template <typename T>
-JetTaggerTableProducer<T>::JetTaggerTableProducer(const edm::ParameterSet& iConfig)
+template<typename T>
+JetTaggerTableProducer<T>::JetTaggerTableProducer(const edm::ParameterSet &iConfig)
     : nameDeepJet_(iConfig.getParameter<std::string>("nameDeepJet")),
       idx_nameDeepJet_(iConfig.getParameter<std::string>("idx_nameDeepJet")),
       n_cpf_(iConfig.getParameter<unsigned int>("n_cpf")),
@@ -63,15 +60,19 @@ JetTaggerTableProducer<T>::JetTaggerTableProducer(const edm::ParameterSet& iConf
       n_sv_(iConfig.getParameter<unsigned int>("n_sv")),
       n_lt_(iConfig.getParameter<unsigned int>("n_lt")),
       jet_token_(consumes<edm::View<T>>(iConfig.getParameter<edm::InputTag>("jets"))),
-      tag_info_src_(consumes<TagInfoCollection>(iConfig.getParameter<edm::InputTag>("tagInfo_src"))) {
+      tag_info_src_(consumes<TagInfoCollection>(iConfig.getParameter<edm::InputTag>("tagInfo_src")))
+{
   produces<nanoaod::FlatTable>(nameDeepJet_);
 }
 
-template <typename T>
-JetTaggerTableProducer<T>::~JetTaggerTableProducer() {}
+template<typename T>
+JetTaggerTableProducer<T>::~JetTaggerTableProducer()
+{
+}
 
-template <typename T>
-void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+template<typename T>
+void JetTaggerTableProducer<T>::produce(edm::Event &iEvent, const edm::EventSetup &iSetup)
+{
   // elements in all these collections must have the same order!
 
   // only necessary to explicitly check correct matching of jets
@@ -117,7 +118,7 @@ void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetu
   std::vector<std::vector<float>> Npfcan_puppiw_nNpf(n_npf_, std::vector<float>(nJets));
   /*
   // only after dataformat updated as well
-  std::vector<std::vector<float>> Npfcan_etarel_nNpf(n_npf_, std::vector<float>(nJets)); 
+  std::vector<std::vector<float>> Npfcan_etarel_nNpf(n_npf_, std::vector<float>(nJets));
   std::vector<std::vector<float>> Npfcan_phirel_nNpf(n_npf_, std::vector<float>(nJets));
   */
 
@@ -134,19 +135,19 @@ void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetu
   std::vector<std::vector<float>> sv_costhetasvpv_nSV(n_sv_, std::vector<float>(nJets));
   /*
   // only after dataformat updated as well
-  std::vector<std::vector<float>> sv_etarel_nSV(n_sv_, std::vector<float>(nJets)); 
+  std::vector<std::vector<float>> sv_etarel_nSV(n_sv_, std::vector<float>(nJets));
   std::vector<std::vector<float>> sv_phirel_nSV(n_sv_, std::vector<float>(nJets));
   */
   std::vector<std::vector<float>> sv_deltaR_nSV(n_sv_, std::vector<float>(nJets));
   std::vector<std::vector<float>> sv_enratio_nSV(n_sv_, std::vector<float>(nJets));
   std::vector<std::vector<float>> lt_pt_nLT(n_lt_, std::vector<float>(nJets));
 
-  if (!tag_infos->empty()) {
-    for (unsigned i_jet = 0; i_jet < nJets; ++i_jet) {
+  if(!tag_infos->empty()) {
+    for(unsigned i_jet = 0; i_jet < nJets; ++i_jet) {
       // jet loop reads tag info instead of constituent info
 
-      const auto& taginfo = (*tag_infos)[i_jet];
-      const auto& features = taginfo.features();
+      const auto &taginfo = (*tag_infos)[i_jet];
+      const auto &features = taginfo.features();
 
       // jet.pt and jet.eta as well as other jet variables (ShallowTagInfo) already included (via DeepCSV)
       // number of elements in different collections
@@ -158,38 +159,34 @@ void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetu
 
       std::vector<const btagbtvdeep::ChargedCandidateFeatures *> ranked_c_pf_features;
       ranked_c_pf_features.reserve(features.c_pf_features.size());
-      for (auto &c_pf : features.c_pf_features) ranked_c_pf_features.push_back(&c_pf);
+      for(auto &c_pf : features.c_pf_features) ranked_c_pf_features.push_back(&c_pf);
 
       std::vector<const btagbtvdeep::NeutralCandidateFeatures *> ranked_n_pf_features;
       ranked_n_pf_features.reserve(features.n_pf_features.size());
-      for (auto &n_pf : features.n_pf_features) ranked_n_pf_features.push_back(&n_pf);
+      for(auto &n_pf : features.n_pf_features) ranked_n_pf_features.push_back(&n_pf);
 
       std::vector<const btagbtvdeep::SecondaryVertexFeatures *> ranked_sv_features;
       ranked_sv_features.reserve(features.sv_features.size());
-      for (auto &sv : features.sv_features) ranked_sv_features.push_back(&sv);
+      for(auto &sv : features.sv_features) ranked_sv_features.push_back(&sv);
 
       std::vector<const btagbtvdeep::LostTracksFeatures *> ranked_lt_features;
       ranked_lt_features.reserve(features.lt_features.size());
-      for (auto &lt : features.lt_features) ranked_lt_features.push_back(&lt);
+      for(auto &lt : features.lt_features) ranked_lt_features.push_back(&lt);
 
       auto max_c_pf_n = std::min(features.c_pf_features.size(), (std::size_t)n_cpf_);
       auto max_n_pf_n = std::min(features.n_pf_features.size(), (std::size_t)n_npf_);
       auto max_sv_n = std::min(features.sv_features.size(), (std::size_t)n_sv_);
       auto max_lt_n = std::min(features.lt_features.size(), (std::size_t)n_lt_);
 
-      auto c_pf_cmp = [](const btagbtvdeep::ChargedCandidateFeatures *a, const btagbtvdeep::ChargedCandidateFeatures *b)
-      { return a->pt > b->pt; };
+      auto c_pf_cmp = [](const btagbtvdeep::ChargedCandidateFeatures *a, const btagbtvdeep::ChargedCandidateFeatures *b) { return a->pt > b->pt; };
       //auto n_pf_cmp = [](const btagbtvdeep::NeutralCandidateFeatures *a, const btagbtvdeep::NeutralCandidateFeatures *b)
       //{ return a->pt > b->pt; };
-      auto sv_cmp = [](const btagbtvdeep::SecondaryVertexFeatures *a, const btagbtvdeep::SecondaryVertexFeatures *b)
-      { return a->pt > b->pt; };
+      auto sv_cmp = [](const btagbtvdeep::SecondaryVertexFeatures *a, const btagbtvdeep::SecondaryVertexFeatures *b) { return a->pt > b->pt; };
       //auto lt_cmp = [](const btagbtvdeep::LostTracksFeatures *a, const btagbtvdeep::LostTracksFeatures *b)
       //{ return a->pt > b->pt; };
 
-      auto c_pf_cmp_ip = [](const btagbtvdeep::ChargedCandidateFeatures *a, const btagbtvdeep::ChargedCandidateFeatures *b)
-      { return fabs(a->btagPf_trackSip3dVal) > fabs(b->btagPf_trackSip3dVal); };
-      auto sv_cmp_ip = [](const btagbtvdeep::SecondaryVertexFeatures *a, const btagbtvdeep::SecondaryVertexFeatures *b)
-      { return fabs(a->d3d) > fabs(b->d3d); };
+      auto c_pf_cmp_ip = [](const btagbtvdeep::ChargedCandidateFeatures *a, const btagbtvdeep::ChargedCandidateFeatures *b) { return fabs(a->btagPf_trackSip3dVal) > fabs(b->btagPf_trackSip3dVal); };
+      auto sv_cmp_ip = [](const btagbtvdeep::SecondaryVertexFeatures *a, const btagbtvdeep::SecondaryVertexFeatures *b) { return fabs(a->d3d) > fabs(b->d3d); };
 
       // c_pf
       if(n_cpf_ == 2) {
@@ -247,8 +244,8 @@ void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetu
       }
 
       // c_pf candidates
-      for (std::size_t c_pf_n = 0; c_pf_n < max_c_pf_n; c_pf_n++) {
-        const auto& c_pf_features = *ranked_c_pf_features.at(c_pf_n);
+      for(std::size_t c_pf_n = 0; c_pf_n < max_c_pf_n; c_pf_n++) {
+        const auto &c_pf_features = *ranked_c_pf_features.at(c_pf_n);
         Cpfcan_BtagPf_trackEtaRel_nCpf[c_pf_n][i_jet] = c_pf_features.btagPf_trackEtaRel;
         Cpfcan_BtagPf_trackPtRel_nCpf[c_pf_n][i_jet] = c_pf_features.btagPf_trackPtRel;
         Cpfcan_BtagPf_trackPPar_nCpf[c_pf_n][i_jet] = c_pf_features.btagPf_trackPPar;
@@ -268,8 +265,8 @@ void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetu
       }
 
       // n_pf candidates
-      for (std::size_t n_pf_n = 0; n_pf_n < max_n_pf_n; n_pf_n++) {
-        const auto& n_pf_features = *ranked_n_pf_features.at(n_pf_n);
+      for(std::size_t n_pf_n = 0; n_pf_n < max_n_pf_n; n_pf_n++) {
+        const auto &n_pf_features = *ranked_n_pf_features.at(n_pf_n);
         Npfcan_ptrel_nNpf[n_pf_n][i_jet] = n_pf_features.ptrel;
         Npfcan_deltaR_nNpf[n_pf_n][i_jet] = n_pf_features.deltaR;
         Npfcan_isGamma_nNpf[n_pf_n][i_jet] = n_pf_features.isGamma;
@@ -277,15 +274,15 @@ void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetu
         Npfcan_drminsv_nNpf[n_pf_n][i_jet] = n_pf_features.drminsv;
         Npfcan_puppiw_nNpf[n_pf_n][i_jet] = n_pf_features.puppiw;
         /*
-            // only after dataformat updated as well
-            Npfcan_etarel_nNpf[n_pf_n][i_jet] = n_pf_features.etarel;
-            Npfcan_phirel_nNpf[n_pf_n][i_jet] = n_pf_features.phirel;
-            */
+        // only after dataformat updated as well
+        Npfcan_etarel_nNpf[n_pf_n][i_jet] = n_pf_features.etarel;
+        Npfcan_phirel_nNpf[n_pf_n][i_jet] = n_pf_features.phirel;
+        */
       }
 
       // sv candidates
-      for (std::size_t sv_n = 0; sv_n < max_sv_n; sv_n++) {
-        const auto& sv_features = *ranked_sv_features.at(sv_n);
+      for(std::size_t sv_n = 0; sv_n < max_sv_n; sv_n++) {
+        const auto &sv_features = *ranked_sv_features.at(sv_n);
         sv_pt_nSV[sv_n][i_jet] = sv_features.pt;
         sv_deltaR_nSV[sv_n][i_jet] = sv_features.deltaR;
         sv_mass_nSV[sv_n][i_jet] = sv_features.mass;
@@ -301,8 +298,8 @@ void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetu
       }
 
       // lt candidates
-      for (std::size_t lt_n = 0; lt_n < max_lt_n; lt_n++) {
-        const auto& lt_features = *ranked_lt_features.at(lt_n);
+      for(std::size_t lt_n = 0; lt_n < max_lt_n; lt_n++) {
+        const auto &lt_features = *ranked_lt_features.at(lt_n);
         lt_pt_nLT[lt_n][i_jet] = lt_features.pt;
       }
     }
@@ -319,171 +316,71 @@ void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetu
   djTable->addColumn<int>("DeepJet_nlt", jet_N_LTs, "Number of lost tracks in the jet");
 
   // ============================================================== Cpfs ===================================================================
-  for (unsigned int p = 0; p < n_cpf_; p++) {
+  for(unsigned int p = 0; p < n_cpf_; p++) {
     auto s = std::to_string(p);
 
-    djTable->addColumn<float>("DeepJet_Cpfcan_puppiw_" + s,
-                              Cpfcan_puppiw_nCpf[p],
-                              "charged candidate PUPPI weight of the " + s + ". cpf",
-                              10);
-    djTable->addColumn<int>(
-        "DeepJet_Cpfcan_VTX_ass_" + s,
-        Cpfcan_VTX_ass_nCpf[p],
-        "integer flag that indicates whether the track was used in the primary vertex fit for the " + s + ". cpf",
-        10);
-    djTable->addColumn<float>("DeepJet_Cpfcan_drminsv_" + s,
-                              Cpfcan_drminsv_nCpf[p],
-                              "track pseudoangular distance from the closest secondary vertex of the " + s + ". cpf",
-                              10);
-    djTable->addColumn<float>("DeepJet_Cpfcan_ptrel_" + s,
-                              Cpfcan_ptrel_nCpf[p],
-                              "fraction of the jet momentum carried by the track for the " + s + ". cpf",
-                              10);
-    djTable->addColumn<int>(
-        "DeepJet_Cpfcan_quality_" + s,
-        Cpfcan_quality_nCpf[p],
-        "integer flag which indicates the quality of the fitted track, based on number of detector hits used for the "
-        "reconstruction as well as the overall chi2 of the charged track fit for the " +
-            s + ". cpf",
-        10);
-    djTable->addColumn<float>(
-        "DeepJet_Cpfcan_chi2_" + s, Cpfcan_chi2_nCpf[p], "chi2 of the charged track fit for the " + s + ". cpf", 10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_puppiw_" + s, Cpfcan_puppiw_nCpf[p], "charged candidate PUPPI weight of the " + s + ". cpf", 10);
+    djTable->addColumn<int>("DeepJet_Cpfcan_VTX_ass_" + s, Cpfcan_VTX_ass_nCpf[p], "integer flag that indicates whether the track was used in the primary vertex fit for the " + s + ". cpf", 10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_drminsv_" + s, Cpfcan_drminsv_nCpf[p], "track pseudoangular distance from the closest secondary vertex of the " + s + ". cpf", 10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_ptrel_" + s, Cpfcan_ptrel_nCpf[p], "fraction of the jet momentum carried by the track for the " + s + ". cpf", 10);
+    djTable->addColumn<int>("DeepJet_Cpfcan_quality_" + s, Cpfcan_quality_nCpf[p],
+        "integer flag which indicates the quality of the fitted track, based on number of detector hits used for the " "reconstruction as well as the overall chi2 of the charged track fit for the " + s + ". cpf", 10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_chi2_" + s, Cpfcan_chi2_nCpf[p], "chi2 of the charged track fit for the " + s + ". cpf", 10);
 
-    djTable->addColumn<float>("DeepJet_Cpfcan_BtagPf_trackDeltaR_" + s,
-                              Cpfcan_BtagPf_trackDeltaR_nCpf[p],
-                              "track pseudoangular distance from the jet axis for the " + s + ". cpf",
-                              10);
-    djTable->addColumn<float>("DeepJet_Cpfcan_BtagPf_trackEtaRel_" + s,
-                              Cpfcan_BtagPf_trackEtaRel_nCpf[p],
-                              "track pseudorapidity, relative to the jet axis for the " + s + ". cpf",
-                              10);
-    djTable->addColumn<float>("DeepJet_Cpfcan_BtagPf_trackJetDistVal_" + s,
-                              Cpfcan_BtagPf_trackJetDistVal_nCpf[p],
-                              "minimum track approach distance to jet axis for the " + s + ". cpf",
-                              10);
-    djTable->addColumn<float>("DeepJet_Cpfcan_BtagPf_trackPPar_" + s,
-                              Cpfcan_BtagPf_trackPPar_nCpf[p],
-                              "dot product of the jet and track momentum for the " + s + ". cpf",
-                              10);
-    djTable->addColumn<float>(
-        "DeepJet_Cpfcan_BtagPf_trackPParRatio_" + s,
-        Cpfcan_BtagPf_trackPParRatio_nCpf[p],
-        "dot product of the jet and track momentum divided by the magnitude of the jet momentum for the " + s + ". cpf",
-        10);
-    djTable->addColumn<float>("DeepJet_Cpfcan_BtagPf_trackPtRel_" + s,
-                              Cpfcan_BtagPf_trackPtRel_nCpf[p],
-                              "track transverse momentum, relative to the jet axis for the " + s + ". cpf",
-                              10);
-    djTable->addColumn<float>("DeepJet_Cpfcan_BtagPf_trackSip2dSig_" + s,
-                              Cpfcan_BtagPf_trackSip2dSig_nCpf[p],
-                              "track 2D signed impact parameter significance for the " + s + ". cpf",
-                              10);
-    djTable->addColumn<float>("DeepJet_Cpfcan_BtagPf_trackSip3dSig_" + s,
-                              Cpfcan_BtagPf_trackSip3dSig_nCpf[p],
-                              "track 3D signed impact parameter significance for the " + s + ". cpf",
-                              10);
-    djTable->addColumn<float>("DeepJet_Cpfcan_BtagPf_trackSip2dVal_" + s,
-                              Cpfcan_BtagPf_trackSip2dVal_nCpf[p],
-                              "track 2D signed impact parameter for the " + s + ". cpf",
-                              10);
-    djTable->addColumn<float>("DeepJet_Cpfcan_BtagPf_trackSip3dVal_" + s,
-                              Cpfcan_BtagPf_trackSip3dVal_nCpf[p],
-                              "track 3D signed impact parameter for the " + s + ". cpf",
-                              10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_BtagPf_trackDeltaR_" + s, Cpfcan_BtagPf_trackDeltaR_nCpf[p], "track pseudoangular distance from the jet axis for the " + s + ". cpf", 10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_BtagPf_trackEtaRel_" + s, Cpfcan_BtagPf_trackEtaRel_nCpf[p], "track pseudorapidity, relative to the jet axis for the " + s + ". cpf", 10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_BtagPf_trackJetDistVal_" + s, Cpfcan_BtagPf_trackJetDistVal_nCpf[p], "minimum track approach distance to jet axis for the " + s + ". cpf", 10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_BtagPf_trackPPar_" + s, Cpfcan_BtagPf_trackPPar_nCpf[p], "dot product of the jet and track momentum for the " + s + ". cpf", 10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_BtagPf_trackPParRatio_" + s, Cpfcan_BtagPf_trackPParRatio_nCpf[p], "dot product of the jet and track momentum divided by the magnitude of the jet momentum for the " + s + ". cpf", 10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_BtagPf_trackPtRel_" + s, Cpfcan_BtagPf_trackPtRel_nCpf[p], "track transverse momentum, relative to the jet axis for the " + s + ". cpf", 10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_BtagPf_trackSip2dSig_" + s, Cpfcan_BtagPf_trackSip2dSig_nCpf[p], "track 2D signed impact parameter significance for the " + s + ". cpf", 10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_BtagPf_trackSip3dSig_" + s, Cpfcan_BtagPf_trackSip3dSig_nCpf[p], "track 3D signed impact parameter significance for the " + s + ". cpf", 10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_BtagPf_trackSip2dVal_" + s, Cpfcan_BtagPf_trackSip2dVal_nCpf[p], "track 2D signed impact parameter for the " + s + ". cpf", 10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_BtagPf_trackSip3dVal_" + s, Cpfcan_BtagPf_trackSip3dVal_nCpf[p], "track 3D signed impact parameter for the " + s + ". cpf", 10);
   }
 
   // ============================================================== Npfs ===================================================================
-  for (unsigned int p = 0; p < n_npf_; p++) {
+  for(unsigned int p = 0; p < n_npf_; p++) {
     auto s = std::to_string(p);
 
-    djTable->addColumn<float>("DeepJet_Npfcan_puppiw_" + s,
-                              Npfcan_puppiw_nNpf[p],
-                              "neutral candidate PUPPI weight for the " + s + ". npf",
-                              10);
-    djTable->addColumn<float>(
-        "DeepJet_Npfcan_deltaR_" + s,
-        Npfcan_deltaR_nNpf[p],
-        "pseudoangular distance between the neutral candidate and the jet axis for the " + s + ". npf",
-        10);
-    djTable->addColumn<float>(
-        "DeepJet_Npfcan_drminsv_" + s,
-        Npfcan_drminsv_nNpf[p],
-        "pseudoangular distance between the neutral candidate and the closest secondary vertex for the " + s + ". npf",
-        10);
-    djTable->addColumn<float>(
-        "DeepJet_Npfcan_HadFrac_" + s,
-        Npfcan_HadFrac_nNpf[p],
-        "fraction of the neutral candidate energy deposited in the hadronic calorimeter for the " + s + ". npf",
-        10);
-    djTable->addColumn<float>("DeepJet_Npfcan_ptrel_" + s,
-                              Npfcan_ptrel_nNpf[p],
-                              "fraction of the jet momentum carried by the neutral candidate for the " + s + ". npf",
-                              10);
-    djTable->addColumn<int>("DeepJet_Npfcan_isGamma_" + s,
-                            Npfcan_isGamma_nNpf[p],
-                            "integer flag indicating whether the neutral candidate is a photon for the " + s + ". npf",
-                            10);
+    djTable->addColumn<float>("DeepJet_Npfcan_puppiw_" + s, Npfcan_puppiw_nNpf[p], "neutral candidate PUPPI weight for the " + s + ". npf", 10);
+    djTable->addColumn<float>("DeepJet_Npfcan_deltaR_" + s, Npfcan_deltaR_nNpf[p], "pseudoangular distance between the neutral candidate and the jet axis for the " + s + ". npf", 10);
+    djTable->addColumn<float>("DeepJet_Npfcan_drminsv_" + s, Npfcan_drminsv_nNpf[p], "pseudoangular distance between the neutral candidate and the closest secondary vertex for the " + s + ". npf", 10);
+    djTable->addColumn<float>("DeepJet_Npfcan_HadFrac_" + s, Npfcan_HadFrac_nNpf[p], "fraction of the neutral candidate energy deposited in the hadronic calorimeter for the " + s + ". npf", 10);
+    djTable->addColumn<float>("DeepJet_Npfcan_ptrel_" + s, Npfcan_ptrel_nNpf[p], "fraction of the jet momentum carried by the neutral candidate for the " + s + ". npf", 10);
+    djTable->addColumn<int>("DeepJet_Npfcan_isGamma_" + s, Npfcan_isGamma_nNpf[p], "integer flag indicating whether the neutral candidate is a photon for the " + s + ". npf", 10);
     /*
-      // only after dataformat updated as well
-      djTable->addColumn<float>("DeepJetExtra_Npfcan_etarel_" + s,
-                                Npfcan_etarel_nNpf[p], 
-                                "pseudorapidity relative to parent jet for the " + s + ". npf",
-                                10);
-      djTable->addColumn<float>("DeepJetExtra_Npfcan_phirel_" + s,
-                                Npfcan_phirel_nNpf[p],
-                                "DeltaPhi(npf, jet) for the " + s + ". npf",
-                                10);
-      */
+    // only after dataformat updated as well
+    djTable->addColumn<float>("DeepJetExtra_Npfcan_etarel_" + s, Npfcan_etarel_nNpf[p], "pseudorapidity relative to parent jet for the " + s + ". npf", 10);
+    djTable->addColumn<float>("DeepJetExtra_Npfcan_phirel_" + s, Npfcan_phirel_nNpf[p], "DeltaPhi(npf, jet) for the " + s + ". npf", 10);
+    */
   }
 
   // ============================================================== SVs ===================================================================
-  for (unsigned int p = 0; p < n_sv_; p++) {
+  for(unsigned int p = 0; p < n_sv_; p++) {
     auto s = std::to_string(p);
 
     djTable->addColumn<float>("DeepJet_sv_mass_" + s, sv_mass_nSV[p], "SV mass of the " + s + ". SV", 10);
     djTable->addColumn<float>("DeepJet_sv_pt_" + s, sv_pt_nSV[p], "SV pt of the " + s + ". SV", 10);
-    djTable->addColumn<float>(
-        "DeepJet_sv_ntracks_" + s, sv_ntracks_nSV[p], "Number of tracks asociated to the " + s + ". SV", 10);
+    djTable->addColumn<float>("DeepJet_sv_ntracks_" + s, sv_ntracks_nSV[p], "Number of tracks asociated to the " + s + ". SV", 10);
     djTable->addColumn<float>("DeepJet_sv_chi2_" + s, sv_chi2_nSV[p], "chi2 of the " + s + ". SV", 10);
     djTable->addColumn<float>("DeepJet_sv_normchi2_" + s, sv_normchi2_nSV[p], "chi2/dof of the " + s + ". SV", 10);
-    djTable->addColumn<float>(
-        "DeepJet_sv_dxy_" + s, sv_dxy_nSV[p], "2D impact parameter (flight distance) value of the " + s + ". SV", 10);
-    djTable->addColumn<float>("DeepJet_sv_dxysig_" + s,
-                              sv_dxysig_nSV[p],
-                              "2D impact parameter (flight distance) significance of the " + s + ". SV",
-                              10);
-    djTable->addColumn<float>(
-        "DeepJet_sv_d3d_" + s, sv_d3d_nSV[p], "3D impact parameter (flight distance) value of the " + s + ". SV", 10);
-    djTable->addColumn<float>("DeepJet_sv_d3dsig_" + s,
-                              sv_d3dsig_nSV[p],
-                              "3D impact parameter (flight distance) significance of the " + s + ". SV",
-                              10);
-    djTable->addColumn<float>("DeepJet_sv_costhetasvpv_" + s,
-                              sv_costhetasvpv_nSV[p],
-                              "cosine of the angle between the " + s +
-                                  ". SV flight direction and the direction of the " + s + ". SV momentum",
-                              10);
+    djTable->addColumn<float>("DeepJet_sv_dxy_" + s, sv_dxy_nSV[p], "2D impact parameter (flight distance) value of the " + s + ". SV", 10);
+    djTable->addColumn<float>("DeepJet_sv_dxysig_" + s, sv_dxysig_nSV[p], "2D impact parameter (flight distance) significance of the " + s + ". SV", 10);
+    djTable->addColumn<float>("DeepJet_sv_d3d_" + s, sv_d3d_nSV[p], "3D impact parameter (flight distance) value of the " + s + ". SV", 10);
+    djTable->addColumn<float>("DeepJet_sv_d3dsig_" + s, sv_d3dsig_nSV[p], "3D impact parameter (flight distance) significance of the " + s + ". SV", 10);
+    djTable->addColumn<float>("DeepJet_sv_costhetasvpv_" + s, sv_costhetasvpv_nSV[p], "cosine of the angle between the " + s + ". SV flight direction and the direction of the " + s + ". SV momentum", 10);
     /*
-      // only after dataformat updated as well
-      djTable->addColumn<float>("DeepJetExtra_sv_etarel_" + s,
-                                sv_etarel_nSV[p], 
-                                "pseudorapidity relative to parent jet for the " + s + ". SV",
-                                10);
-      djTable->addColumn<float>("DeepJetExtra_sv_phirel_" + s,
-                                sv_phirel_nSV[p],
-                                "DeltaPhi(sv, jet) for the " + s + ". SV",
-                                10);
-      */
-    djTable->addColumn<float>("DeepJet_sv_deltaR_" + s,
-                              sv_deltaR_nSV[p],
-                              "pseudoangular distance between jet axis and the " + s + ". SV direction",
-                              10);
-    djTable->addColumn<float>(
-        "DeepJet_sv_enratio_" + s, sv_enratio_nSV[p], "ratio of the " + s + ". SV energy ratio to the jet energy", 10);
+    // only after dataformat updated as well
+    djTable->addColumn<float>("DeepJetExtra_sv_etarel_" + s, sv_etarel_nSV[p], "pseudorapidity relative to parent jet for the " + s + ". SV", 10);
+    djTable->addColumn<float>("DeepJetExtra_sv_phirel_" + s, sv_phirel_nSV[p], "DeltaPhi(sv, jet) for the " + s + ". SV", 10);
+    */
+    djTable->addColumn<float>("DeepJet_sv_deltaR_" + s, sv_deltaR_nSV[p], "pseudoangular distance between jet axis and the " + s + ". SV direction", 10);
+    djTable->addColumn<float>("DeepJet_sv_enratio_" + s, sv_enratio_nSV[p], "ratio of the " + s + ". SV energy ratio to the jet energy", 10);
   }
 
   // ============================================================== LTs ===================================================================
-  for (unsigned int p = 0; p < n_lt_; p++) {
+  for(unsigned int p = 0; p < n_lt_; p++) {
     auto s = std::to_string(p);
     djTable->addColumn<float>("DeepJet_lt_pt_" + s, lt_pt_nLT[p], "Lost track pt of the " + s + ". LT", 10);
   }
@@ -491,8 +388,9 @@ void JetTaggerTableProducer<T>::produce(edm::Event& iEvent, const edm::EventSetu
   iEvent.put(std::move(djTable), nameDeepJet_);
 }
 
-template <typename T>
-void JetTaggerTableProducer<T>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+template<typename T>
+void JetTaggerTableProducer<T>::fillDescriptions(edm::ConfigurationDescriptions &descriptions)
+{
   edm::ParameterSetDescription desc;
   desc.add<std::string>("nameDeepJet", "Jet");
   desc.add<std::string>("idx_nameDeepJet", "djIdx");
