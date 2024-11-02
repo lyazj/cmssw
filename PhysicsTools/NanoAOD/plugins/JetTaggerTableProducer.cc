@@ -108,6 +108,15 @@ void JetTaggerTableProducer<T>::produce(edm::Event &iEvent, const edm::EventSetu
   std::vector<std::vector<float>> Cpfcan_puppiw_nCpf(n_cpf_, std::vector<float>(nJets));
   std::vector<std::vector<float>> Cpfcan_chi2_nCpf(n_cpf_, std::vector<float>(nJets));
   std::vector<std::vector<int>> Cpfcan_quality_nCpf(n_cpf_, std::vector<int>(nJets));
+  std::vector<std::vector<float>> Cpfcan_charge_nCpf(n_cpf_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> Cpfcan_dz_nCpf(n_cpf_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> Cpfcan_btagPf_trackDecayLen_nCpf(n_cpf_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> Cpfcan_HadFrac_nCpf(n_cpf_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> Cpfcan_CaloFrac_nCpf(n_cpf_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> Cpfcan_pdgID_nCpf(n_cpf_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> Cpfcan_lostInnerHits_nCpf(n_cpf_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> Cpfcan_numberOfPixelHits_nCpf(n_cpf_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> Cpfcan_numberOfStripHits_nCpf(n_cpf_, std::vector<float>(nJets));
 
   // should default to 0 if less than nNpf npf with information
   std::vector<std::vector<float>> Npfcan_ptrel_nNpf(n_npf_, std::vector<float>(nJets));
@@ -262,6 +271,15 @@ void JetTaggerTableProducer<T>::produce(edm::Event &iEvent, const edm::EventSetu
         Cpfcan_puppiw_nCpf[c_pf_n][i_jet] = c_pf_features.puppiw;
         Cpfcan_chi2_nCpf[c_pf_n][i_jet] = c_pf_features.chi2;
         Cpfcan_quality_nCpf[c_pf_n][i_jet] = c_pf_features.quality;
+        Cpfcan_charge_nCpf[c_pf_n][i_jet] = c_pf_features.charge;
+        Cpfcan_dz_nCpf[c_pf_n][i_jet] = c_pf_features.dz;
+        Cpfcan_btagPf_trackDecayLen_nCpf[c_pf_n][i_jet] = c_pf_features.btagPf_trackDecayLen;
+        Cpfcan_HadFrac_nCpf[c_pf_n][i_jet] = c_pf_features.HadFrac;
+        Cpfcan_CaloFrac_nCpf[c_pf_n][i_jet] = c_pf_features.CaloFrac;
+        Cpfcan_pdgID_nCpf[c_pf_n][i_jet] = c_pf_features.pdgID;
+        Cpfcan_lostInnerHits_nCpf[c_pf_n][i_jet] = c_pf_features.lostInnerHits;
+        Cpfcan_numberOfPixelHits_nCpf[c_pf_n][i_jet] = c_pf_features.numberOfPixelHits;
+        Cpfcan_numberOfStripHits_nCpf[c_pf_n][i_jet] = c_pf_features.numberOfStripHits;
       }
 
       // n_pf candidates
@@ -319,13 +337,21 @@ void JetTaggerTableProducer<T>::produce(edm::Event &iEvent, const edm::EventSetu
   for(unsigned int p = 0; p < n_cpf_; p++) {
     auto s = std::to_string(p);
 
-    djTable->addColumn<float>("DeepJet_Cpfcan_puppiw_" + s, Cpfcan_puppiw_nCpf[p], "charged candidate PUPPI weight of the " + s + ". cpf", 10);
-    djTable->addColumn<int>("DeepJet_Cpfcan_VTX_ass_" + s, Cpfcan_VTX_ass_nCpf[p], "integer flag that indicates whether the track was used in the primary vertex fit for the " + s + ". cpf", 10);
-    djTable->addColumn<float>("DeepJet_Cpfcan_drminsv_" + s, Cpfcan_drminsv_nCpf[p], "track pseudoangular distance from the closest secondary vertex of the " + s + ". cpf", 10);
     djTable->addColumn<float>("DeepJet_Cpfcan_ptrel_" + s, Cpfcan_ptrel_nCpf[p], "fraction of the jet momentum carried by the track for the " + s + ". cpf", 10);
-    djTable->addColumn<int>("DeepJet_Cpfcan_quality_" + s, Cpfcan_quality_nCpf[p],
-        "integer flag which indicates the quality of the fitted track, based on number of detector hits used for the " "reconstruction as well as the overall chi2 of the charged track fit for the " + s + ". cpf", 10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_drminsv_" + s, Cpfcan_drminsv_nCpf[p], "track pseudoangular distance from the closest secondary vertex of the " + s + ". cpf", 10);
+    djTable->addColumn<int>("DeepJet_Cpfcan_VTX_ass_" + s, Cpfcan_VTX_ass_nCpf[p], "integer flag that indicates whether the track was used in the primary vertex fit for the " + s + ". cpf", 10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_puppiw_" + s, Cpfcan_puppiw_nCpf[p], "charged candidate PUPPI weight of the " + s + ". cpf", 10);
     djTable->addColumn<float>("DeepJet_Cpfcan_chi2_" + s, Cpfcan_chi2_nCpf[p], "chi2 of the charged track fit for the " + s + ". cpf", 10);
+    djTable->addColumn<int>("DeepJet_Cpfcan_quality_" + s, Cpfcan_quality_nCpf[p], "integer flag which indicates the quality of the fitted track, based on number of detector hits used for the " "reconstruction as well as the overall chi2 of the charged track fit for the " + s + ". cpf", 10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_charge_" + s, Cpfcan_charge_nCpf[p], "", 10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_dz_" + s, Cpfcan_dz_nCpf[p], "", 10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_btagPf_trackDecayLen_" + s, Cpfcan_btagPf_trackDecayLen_nCpf[p], "", 10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_HadFrac_" + s, Cpfcan_HadFrac_nCpf[p], "", 10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_CaloFrac_" + s, Cpfcan_CaloFrac_nCpf[p], "", 10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_pdgID_" + s, Cpfcan_pdgID_nCpf[p], "", 10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_lostInnerHits_" + s, Cpfcan_lostInnerHits_nCpf[p], "", 10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_numberOfPixelHits_" + s, Cpfcan_numberOfPixelHits_nCpf[p], "", 10);
+    djTable->addColumn<float>("DeepJet_Cpfcan_numberOfStripHits_" + s, Cpfcan_numberOfStripHits_nCpf[p], "", 10);
 
     djTable->addColumn<float>("DeepJet_Cpfcan_BtagPf_trackDeltaR_" + s, Cpfcan_BtagPf_trackDeltaR_nCpf[p], "track pseudoangular distance from the jet axis for the " + s + ". cpf", 10);
     djTable->addColumn<float>("DeepJet_Cpfcan_BtagPf_trackEtaRel_" + s, Cpfcan_BtagPf_trackEtaRel_nCpf[p], "track pseudorapidity, relative to the jet axis for the " + s + ". cpf", 10);

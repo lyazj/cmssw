@@ -13,7 +13,7 @@ BracedInitializerIndentWidth: 0
 BreakAdjacentStringLiterals: false
 BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeBraces: WebKit
-ColumnLimit: 250
+ColumnLimit: 500
 CompactNamespaces: true
 ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 4
