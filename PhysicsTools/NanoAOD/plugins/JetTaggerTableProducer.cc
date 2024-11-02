@@ -120,16 +120,13 @@ void JetTaggerTableProducer<T>::produce(edm::Event &iEvent, const edm::EventSetu
 
   // should default to 0 if less than nNpf npf with information
   std::vector<std::vector<float>> Npfcan_ptrel_nNpf(n_npf_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> Npfcan_etarel_nNpf(n_npf_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> Npfcan_phirel_nNpf(n_npf_, std::vector<float>(nJets));
   std::vector<std::vector<float>> Npfcan_deltaR_nNpf(n_npf_, std::vector<float>(nJets));
   std::vector<std::vector<int>> Npfcan_isGamma_nNpf(n_npf_, std::vector<int>(nJets));
   std::vector<std::vector<float>> Npfcan_HadFrac_nNpf(n_npf_, std::vector<float>(nJets));
   std::vector<std::vector<float>> Npfcan_drminsv_nNpf(n_npf_, std::vector<float>(nJets));
   std::vector<std::vector<float>> Npfcan_puppiw_nNpf(n_npf_, std::vector<float>(nJets));
-  /*
-  // only after dataformat updated as well
-  std::vector<std::vector<float>> Npfcan_etarel_nNpf(n_npf_, std::vector<float>(nJets));
-  std::vector<std::vector<float>> Npfcan_phirel_nNpf(n_npf_, std::vector<float>(nJets));
-  */
 
   // should default to 0 if less than nSv SVs with information
   std::vector<std::vector<float>> sv_mass_nSV(n_sv_, std::vector<float>(nJets));
@@ -286,16 +283,13 @@ void JetTaggerTableProducer<T>::produce(edm::Event &iEvent, const edm::EventSetu
       for(std::size_t n_pf_n = 0; n_pf_n < max_n_pf_n; n_pf_n++) {
         const auto &n_pf_features = *ranked_n_pf_features.at(n_pf_n);
         Npfcan_ptrel_nNpf[n_pf_n][i_jet] = n_pf_features.ptrel;
+        Npfcan_etarel_nNpf[n_pf_n][i_jet] = n_pf_features.etarel;
+        Npfcan_phirel_nNpf[n_pf_n][i_jet] = n_pf_features.phirel;
         Npfcan_deltaR_nNpf[n_pf_n][i_jet] = n_pf_features.deltaR;
         Npfcan_isGamma_nNpf[n_pf_n][i_jet] = n_pf_features.isGamma;
         Npfcan_HadFrac_nNpf[n_pf_n][i_jet] = n_pf_features.hadFrac;
         Npfcan_drminsv_nNpf[n_pf_n][i_jet] = n_pf_features.drminsv;
         Npfcan_puppiw_nNpf[n_pf_n][i_jet] = n_pf_features.puppiw;
-        /*
-        // only after dataformat updated as well
-        Npfcan_etarel_nNpf[n_pf_n][i_jet] = n_pf_features.etarel;
-        Npfcan_phirel_nNpf[n_pf_n][i_jet] = n_pf_features.phirel;
-        */
       }
 
       // sv candidates
@@ -369,17 +363,14 @@ void JetTaggerTableProducer<T>::produce(edm::Event &iEvent, const edm::EventSetu
   for(unsigned int p = 0; p < n_npf_; p++) {
     auto s = std::to_string(p);
 
-    djTable->addColumn<float>("DeepJet_Npfcan_puppiw_" + s, Npfcan_puppiw_nNpf[p], "neutral candidate PUPPI weight for the " + s + ". npf", 10);
-    djTable->addColumn<float>("DeepJet_Npfcan_deltaR_" + s, Npfcan_deltaR_nNpf[p], "pseudoangular distance between the neutral candidate and the jet axis for the " + s + ". npf", 10);
-    djTable->addColumn<float>("DeepJet_Npfcan_drminsv_" + s, Npfcan_drminsv_nNpf[p], "pseudoangular distance between the neutral candidate and the closest secondary vertex for the " + s + ". npf", 10);
-    djTable->addColumn<float>("DeepJet_Npfcan_HadFrac_" + s, Npfcan_HadFrac_nNpf[p], "fraction of the neutral candidate energy deposited in the hadronic calorimeter for the " + s + ". npf", 10);
     djTable->addColumn<float>("DeepJet_Npfcan_ptrel_" + s, Npfcan_ptrel_nNpf[p], "fraction of the jet momentum carried by the neutral candidate for the " + s + ". npf", 10);
-    djTable->addColumn<int>("DeepJet_Npfcan_isGamma_" + s, Npfcan_isGamma_nNpf[p], "integer flag indicating whether the neutral candidate is a photon for the " + s + ". npf", 10);
-    /*
-    // only after dataformat updated as well
     djTable->addColumn<float>("DeepJetExtra_Npfcan_etarel_" + s, Npfcan_etarel_nNpf[p], "pseudorapidity relative to parent jet for the " + s + ". npf", 10);
     djTable->addColumn<float>("DeepJetExtra_Npfcan_phirel_" + s, Npfcan_phirel_nNpf[p], "DeltaPhi(npf, jet) for the " + s + ". npf", 10);
-    */
+    djTable->addColumn<float>("DeepJet_Npfcan_deltaR_" + s, Npfcan_deltaR_nNpf[p], "pseudoangular distance between the neutral candidate and the jet axis for the " + s + ". npf", 10);
+    djTable->addColumn<int>("DeepJet_Npfcan_isGamma_" + s, Npfcan_isGamma_nNpf[p], "integer flag indicating whether the neutral candidate is a photon for the " + s + ". npf", 10);
+    djTable->addColumn<float>("DeepJet_Npfcan_HadFrac_" + s, Npfcan_HadFrac_nNpf[p], "fraction of the neutral candidate energy deposited in the hadronic calorimeter for the " + s + ". npf", 10);
+    djTable->addColumn<float>("DeepJet_Npfcan_drminsv_" + s, Npfcan_drminsv_nNpf[p], "pseudoangular distance between the neutral candidate and the closest secondary vertex for the " + s + ". npf", 10);
+    djTable->addColumn<float>("DeepJet_Npfcan_puppiw_" + s, Npfcan_puppiw_nNpf[p], "neutral candidate PUPPI weight for the " + s + ". npf", 10);
   }
 
   // ============================================================== SVs ===================================================================
