@@ -129,8 +129,11 @@ void JetTaggerTableProducer<T>::produce(edm::Event &iEvent, const edm::EventSetu
   std::vector<std::vector<float>> Npfcan_puppiw_nNpf(n_npf_, std::vector<float>(nJets));
 
   // should default to 0 if less than nSv SVs with information
-  std::vector<std::vector<float>> sv_mass_nSV(n_sv_, std::vector<float>(nJets));
   std::vector<std::vector<float>> sv_pt_nSV(n_sv_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> sv_deltaR_nSV(n_sv_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> sv_mass_nSV(n_sv_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> sv_etarel_nSV(n_sv_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> sv_phirel_nSV(n_sv_, std::vector<float>(nJets));
   std::vector<std::vector<int>> sv_ntracks_nSV(n_sv_, std::vector<int>(nJets));
   std::vector<std::vector<float>> sv_chi2_nSV(n_sv_, std::vector<float>(nJets));
   std::vector<std::vector<float>> sv_normchi2_nSV(n_sv_, std::vector<float>(nJets));
@@ -139,13 +142,8 @@ void JetTaggerTableProducer<T>::produce(edm::Event &iEvent, const edm::EventSetu
   std::vector<std::vector<float>> sv_d3d_nSV(n_sv_, std::vector<float>(nJets));
   std::vector<std::vector<float>> sv_d3dsig_nSV(n_sv_, std::vector<float>(nJets));
   std::vector<std::vector<float>> sv_costhetasvpv_nSV(n_sv_, std::vector<float>(nJets));
-  /*
-  // only after dataformat updated as well
-  std::vector<std::vector<float>> sv_etarel_nSV(n_sv_, std::vector<float>(nJets));
-  std::vector<std::vector<float>> sv_phirel_nSV(n_sv_, std::vector<float>(nJets));
-  */
-  std::vector<std::vector<float>> sv_deltaR_nSV(n_sv_, std::vector<float>(nJets));
   std::vector<std::vector<float>> sv_enratio_nSV(n_sv_, std::vector<float>(nJets));
+
   std::vector<std::vector<float>> lt_pt_nLT(n_lt_, std::vector<float>(nJets));
 
   if(!tag_infos->empty()) {
@@ -298,6 +296,8 @@ void JetTaggerTableProducer<T>::produce(edm::Event &iEvent, const edm::EventSetu
         sv_pt_nSV[sv_n][i_jet] = sv_features.pt;
         sv_deltaR_nSV[sv_n][i_jet] = sv_features.deltaR;
         sv_mass_nSV[sv_n][i_jet] = sv_features.mass;
+        sv_etarel_nSV[sv_n][i_jet] = sv_features.etarel;
+        sv_phirel_nSV[sv_n][i_jet] = sv_features.phirel;
         sv_ntracks_nSV[sv_n][i_jet] = sv_features.ntracks;
         sv_chi2_nSV[sv_n][i_jet] = sv_features.chi2;
         sv_normchi2_nSV[sv_n][i_jet] = sv_features.normchi2;
@@ -377,8 +377,11 @@ void JetTaggerTableProducer<T>::produce(edm::Event &iEvent, const edm::EventSetu
   for(unsigned int p = 0; p < n_sv_; p++) {
     auto s = std::to_string(p);
 
-    djTable->addColumn<float>("DeepJet_sv_mass_" + s, sv_mass_nSV[p], "SV mass of the " + s + ". SV", 10);
     djTable->addColumn<float>("DeepJet_sv_pt_" + s, sv_pt_nSV[p], "SV pt of the " + s + ". SV", 10);
+    djTable->addColumn<float>("DeepJet_sv_deltaR_" + s, sv_deltaR_nSV[p], "pseudoangular distance between jet axis and the " + s + ". SV direction", 10);
+    djTable->addColumn<float>("DeepJet_sv_mass_" + s, sv_mass_nSV[p], "SV mass of the " + s + ". SV", 10);
+    djTable->addColumn<float>("DeepJetExtra_sv_etarel_" + s, sv_etarel_nSV[p], "pseudorapidity relative to parent jet for the " + s + ". SV", 10);
+    djTable->addColumn<float>("DeepJetExtra_sv_phirel_" + s, sv_phirel_nSV[p], "DeltaPhi(sv, jet) for the " + s + ". SV", 10);
     djTable->addColumn<float>("DeepJet_sv_ntracks_" + s, sv_ntracks_nSV[p], "Number of tracks asociated to the " + s + ". SV", 10);
     djTable->addColumn<float>("DeepJet_sv_chi2_" + s, sv_chi2_nSV[p], "chi2 of the " + s + ". SV", 10);
     djTable->addColumn<float>("DeepJet_sv_normchi2_" + s, sv_normchi2_nSV[p], "chi2/dof of the " + s + ". SV", 10);
@@ -387,12 +390,6 @@ void JetTaggerTableProducer<T>::produce(edm::Event &iEvent, const edm::EventSetu
     djTable->addColumn<float>("DeepJet_sv_d3d_" + s, sv_d3d_nSV[p], "3D impact parameter (flight distance) value of the " + s + ". SV", 10);
     djTable->addColumn<float>("DeepJet_sv_d3dsig_" + s, sv_d3dsig_nSV[p], "3D impact parameter (flight distance) significance of the " + s + ". SV", 10);
     djTable->addColumn<float>("DeepJet_sv_costhetasvpv_" + s, sv_costhetasvpv_nSV[p], "cosine of the angle between the " + s + ". SV flight direction and the direction of the " + s + ". SV momentum", 10);
-    /*
-    // only after dataformat updated as well
-    djTable->addColumn<float>("DeepJetExtra_sv_etarel_" + s, sv_etarel_nSV[p], "pseudorapidity relative to parent jet for the " + s + ". SV", 10);
-    djTable->addColumn<float>("DeepJetExtra_sv_phirel_" + s, sv_phirel_nSV[p], "DeltaPhi(sv, jet) for the " + s + ". SV", 10);
-    */
-    djTable->addColumn<float>("DeepJet_sv_deltaR_" + s, sv_deltaR_nSV[p], "pseudoangular distance between jet axis and the " + s + ". SV direction", 10);
     djTable->addColumn<float>("DeepJet_sv_enratio_" + s, sv_enratio_nSV[p], "ratio of the " + s + ". SV energy ratio to the jet energy", 10);
   }
 
