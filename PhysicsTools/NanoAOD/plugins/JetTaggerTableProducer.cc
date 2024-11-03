@@ -76,7 +76,6 @@ void JetTaggerTableProducer<T>::produce(edm::Event &iEvent, const edm::EventSetu
   // elements in all these collections must have the same order!
 
   // only necessary to explicitly check correct matching of jets
-  // std::vector<int> jetIdx_dj;
 
   auto jets = iEvent.getHandle(jet_token_);
 
@@ -87,7 +86,6 @@ void JetTaggerTableProducer<T>::produce(edm::Event &iEvent, const edm::EventSetu
 
   std::vector<int> jet_N_CPFCands(nJets);
   std::vector<int> jet_N_NPFCands(nJets);
-  //std::vector<int> jet_N_PVs(nJets);
   std::vector<int> jet_N_SVs(nJets);
   std::vector<int> jet_N_LTs(nJets);
 
@@ -197,7 +195,6 @@ void JetTaggerTableProducer<T>::produce(edm::Event &iEvent, const edm::EventSetu
       jet_N_CPFCands[i_jet] = features.c_pf_features.size();
       jet_N_NPFCands[i_jet] = features.n_pf_features.size();
       jet_N_SVs[i_jet] = features.sv_features.size();
-      //jet_N_PVs[i_jet] = features.npv;
       jet_N_LTs[i_jet] = features.lt_features.size();
 
       std::vector<const btagbtvdeep::ChargedCandidateFeatures *> ranked_c_pf_features;
@@ -396,12 +393,10 @@ void JetTaggerTableProducer<T>::produce(edm::Event &iEvent, const edm::EventSetu
 
   // DeepJetInputs table
   auto djTable = std::make_unique<nanoaod::FlatTable>(jet_N_CPFCands.size(), nameDeepJet_, false, true);
-  //djTable->addColumn<int>("DeepJet_jetIdx", jetIdx_dj, "Index of the parent jet", );
 
   djTable->addColumn<int>("DeepJet_nCpfcand", jet_N_CPFCands, "Number of charged PF candidates in the jet");
   djTable->addColumn<int>("DeepJet_nNpfcand", jet_N_NPFCands, "Number of neutral PF candidates in the jet");
   djTable->addColumn<int>("DeepJet_nsv", jet_N_SVs, "Number of secondary vertices in the jet");
-  //djTable->addColumn<int>("DeepJet_npv", jet_N_PVs, "Number of primary vertices");
   djTable->addColumn<int>("DeepJet_nlt", jet_N_LTs, "Number of lost tracks in the jet");
 
   // ============================================================== Cpfs ===================================================================
