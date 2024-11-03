@@ -151,10 +151,15 @@ void JetTaggerTableProducer<T>::produce(edm::Event &iEvent, const edm::EventSetu
   std::vector<std::vector<float>> sv_d3dsig_nSV(n_sv_, std::vector<float>(nJets));
   std::vector<std::vector<float>> sv_costhetasvpv_nSV(n_sv_, std::vector<float>(nJets));
   std::vector<std::vector<float>> sv_enratio_nSV(n_sv_, std::vector<float>(nJets));
+#ifdef JTTP_NEED_SV_PE  // disabled by default to better save space
   std::vector<std::vector<float>> sv_px_nSV(n_sv_, std::vector<float>(nJets));
   std::vector<std::vector<float>> sv_py_nSV(n_sv_, std::vector<float>(nJets));
   std::vector<std::vector<float>> sv_pz_nSV(n_sv_, std::vector<float>(nJets));
   std::vector<std::vector<float>> sv_e_nSV(n_sv_, std::vector<float>(nJets));
+#else  /* JTTP_NEED_SV_PE */
+  std::vector<std::vector<float>> sv_eta_nSV(n_sv_, std::vector<float>(nJets));
+  std::vector<std::vector<float>> sv_phi_nSV(n_sv_, std::vector<float>(nJets));
+#endif /* JTTP_NEED_SV_PE */
 
   // should default to 0 if less than nLT LTs with information
   std::vector<std::vector<float>> lt_btagPf_trackEtaRel_nLT(n_lt_, std::vector<float>(nJets));
@@ -349,10 +354,15 @@ void JetTaggerTableProducer<T>::produce(edm::Event &iEvent, const edm::EventSetu
         sv_d3dsig_nSV[sv_n][i_jet] = sv_features.d3dsig;
         sv_costhetasvpv_nSV[sv_n][i_jet] = sv_features.costhetasvpv;
         sv_enratio_nSV[sv_n][i_jet] = sv_features.enratio;
+#ifdef JTTP_NEED_SV_PE
         sv_px_nSV[sv_n][i_jet] = sv_features.px;
         sv_py_nSV[sv_n][i_jet] = sv_features.py;
         sv_pz_nSV[sv_n][i_jet] = sv_features.pz;
         sv_e_nSV[sv_n][i_jet] = sv_features.e;
+#else  /* JTTP_NEED_SV_PE */
+        sv_eta_nSV[sv_n][i_jet] = sv_features.eta;
+        sv_phi_nSV[sv_n][i_jet] = sv_features.phi;
+#endif /* JTTP_NEED_SV_PE */
       }
 
       // lt candidates
@@ -465,10 +475,15 @@ void JetTaggerTableProducer<T>::produce(edm::Event &iEvent, const edm::EventSetu
     djTable->addColumn<float>("DeepJet_sv_d3dsig_" + s, sv_d3dsig_nSV[p], "3D impact parameter (flight distance) significance of the " + s + ". SV", 10);
     djTable->addColumn<float>("DeepJet_sv_costhetasvpv_" + s, sv_costhetasvpv_nSV[p], "cosine of the angle between the " + s + ". SV flight direction and the direction of the " + s + ". SV momentum", 10);
     djTable->addColumn<float>("DeepJet_sv_enratio_" + s, sv_enratio_nSV[p], "ratio of the " + s + ". SV energy ratio to the jet energy", 10);
+#ifdef JTTP_NEED_SV_PE
     djTable->addColumn<float>("DeepJet_sv_px_" + s, sv_px_nSV[p], "", 10);
     djTable->addColumn<float>("DeepJet_sv_py_" + s, sv_py_nSV[p], "", 10);
     djTable->addColumn<float>("DeepJet_sv_pz_" + s, sv_pz_nSV[p], "", 10);
     djTable->addColumn<float>("DeepJet_sv_e_" + s, sv_e_nSV[p], "", 10);
+#else  /* JTTP_NEED_SV_PE */
+    djTable->addColumn<float>("DeepJet_sv_eta_" + s, sv_eta_nSV[p], "", 10);
+    djTable->addColumn<float>("DeepJet_sv_phi_" + s, sv_phi_nSV[p], "", 10);
+#endif /* JTTP_NEED_SV_PE */
   }
 
   // ============================================================== LTs ===================================================================
